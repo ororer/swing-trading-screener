@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Swing Tracker</title>
+    <title>Swing Tracker Pro</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SwingApp">
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/192/bullish.png">
 
-    <!-- ספריות Firebase -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
@@ -27,7 +27,7 @@
             height: 100vh; 
         }
         
-        /* סרגל עליון נקי */
+        /* סרגל עליון */
         .app-header { 
             display: flex; 
             justify-content: space-between; 
@@ -36,6 +36,7 @@
             background: #1a1a1a; 
             border-bottom: 1px solid #2d2d2d; 
             height: 52px; 
+            transition: 0.2s;
         }
         .header-title { 
             font-size: 1.1em; 
@@ -92,7 +93,7 @@
             font-size: 1em; 
         }
 
-        /* אזור תוכן מרכזי */
+        /* תוכן מרכזי */
         .app-views { 
             height: calc(100vh - 110px); 
             width: 100%; 
@@ -108,6 +109,8 @@
         .view.active { 
             display: block; 
         }
+        
+        /* אזור גרף */
         #view-chart { 
             overflow: hidden; 
             position: relative; 
@@ -116,6 +119,28 @@
             width: 100%; 
             height: 100%; 
         }
+
+        /* כפתור מסך מלא לגרף */
+        .fullscreen-chart-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 850;
+            background: rgba(30, 30, 30, 0.85);
+            border: 1px solid #444;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        /* מצב מסך מלא אמיתי לאפליקציה */
+        body.is-fullscreen .app-header { display: none !important; }
+        body.is-fullscreen .bottom-nav { display: none !important; }
+        body.is-fullscreen .app-views { height: 100vh !important; }
+        body.is-fullscreen .fullscreen-chart-btn { top: 15px; left: 15px; background: #4caf50; color: #000; font-weight: bold; }
 
         /* סרגל ניווט תחתון */
         .bottom-nav { 
@@ -153,15 +178,16 @@
             font-size: 1.3em; 
         }
 
-        /* מסך סורק מניות */
-        .screener-list { 
-            padding: 12px; 
-        }
+        /* סורק מניות ופילטרים */
+        .screener-top-bar { display: flex; gap: 8px; padding: 10px 12px 0 12px; overflow-x: auto; }
+        .filter-chip { background: #242424; border: 1px solid #3d3d3d; color: #aaa; padding: 5px 12px; border-radius: 16px; font-size: 0.8em; white-space: nowrap; cursor: pointer; }
+        .filter-chip.active { background: #4caf50; color: #000; font-weight: bold; border-color: #4caf50; }
+        .screener-list { padding: 12px; }
         .stock-card { 
             background: #1e1e1e; 
             border: 1px solid #2d2d2d; 
             border-radius: 10px; 
-            padding: 14px; 
+            padding: 12px 14px; 
             margin-bottom: 10px; 
             display: flex; 
             justify-content: space-between; 
@@ -174,7 +200,7 @@
             border-color: #4caf50; 
         }
         .stock-ticker { 
-            font-size: 1.15em; 
+            font-size: 1.1em; 
             font-weight: bold; 
             color: #4caf50; 
         }
@@ -191,7 +217,7 @@
             font-weight: bold; 
         }
 
-        /* כרטיסיית ניתוח נשלפת מלמטה (Bottom Sheet) */
+        /* Bottom Sheet ניתוח נשלף */
         .bottom-sheet { 
             position: absolute; 
             bottom: 0; 
@@ -254,24 +280,24 @@
             border-right: 3px solid #4caf50; 
         }
 
-        /* מסך תיק השקעות */
-        .portfolio-view { 
-            padding: 14px; 
-        }
+        /* תיק השקעות ודוח סטטיסטיקות */
+        .portfolio-view { padding: 14px; }
+        .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+        .stat-card { background: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 10px; text-align: center; }
+        .stat-card-val { font-size: 1.1em; font-weight: bold; color: #4caf50; }
+        .stat-card-lbl { font-size: 0.7em; color: #888; margin-top: 2px; }
+
         .trade-form { 
             background: #1e1e1e; 
             border: 1px solid #2d2d2d; 
             border-radius: 10px; 
-            padding: 14px; 
-            margin-bottom: 14px; 
+            padding: 12px; 
+            margin-bottom: 12px; 
             display: flex; 
             flex-direction: column; 
             gap: 8px; 
         }
-        .form-row { 
-            display: flex; 
-            gap: 8px; 
-        }
+        .form-row { display: flex; gap: 8px; }
         .trade-form input { 
             flex: 1; 
             padding: 9px 12px; 
@@ -285,7 +311,7 @@
             background: #1976d2; 
             color: white; 
             border: none; 
-            padding: 11px; 
+            padding: 10px; 
             border-radius: 6px; 
             font-weight: bold; 
             cursor: pointer; 
@@ -299,27 +325,10 @@
             padding: 12px; 
             margin-bottom: 10px; 
         }
-        .trade-item.closed { 
-            border-right-color: #666; 
-            opacity: 0.85; 
-        }
-        .trade-top { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 6px; 
-        }
-        .trade-info { 
-            font-size: 0.85em; 
-            color: #aaa; 
-            line-height: 1.5; 
-        }
-        .trade-actions { 
-            margin-top: 10px; 
-            display: flex; 
-            gap: 8px; 
-            align-items: center; 
-        }
+        .trade-item.closed { border-right-color: #666; opacity: 0.85; }
+        .trade-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .trade-info { font-size: 0.85em; color: #aaa; line-height: 1.5; }
+        .trade-actions { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
         
         .btn-action { 
             background: #2a2a2a; 
@@ -330,126 +339,32 @@
             font-size: 0.8em; 
             cursor: pointer; 
         }
-        .btn-close-trade { 
-            background: #c62828; 
-            border-color: #b71c1c; 
-        }
-        .profit { 
-            color: #4caf50; 
-            font-weight: bold; 
-        }
-        .loss { 
-            color: #f44336; 
-            font-weight: bold; 
-        }
+        .btn-close-trade { background: #c62828; border-color: #b71c1c; }
+        .profit { color: #4caf50; font-weight: bold; }
+        .loss { color: #f44336; font-weight: bold; }
 
-        /* תפריט הגדרות נשלף (Settings Drawer) */
-        .settings-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.6); 
-            z-index: 998; 
-            opacity: 0; 
-            pointer-events: none; 
-            transition: 0.3s; 
-        }
-        .settings-overlay.active { 
-            opacity: 1; 
-            pointer-events: auto; 
-        }
-        .settings-drawer { 
-            position: fixed; 
-            top: 0; 
-            right: -320px; 
-            width: 300px; 
-            height: 100vh; 
-            background: #1a1a1a; 
-            z-index: 999; 
-            transition: right 0.3s ease; 
-            border-left: 1px solid #333; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .settings-drawer.active { 
-            right: 0; 
-        }
-        .drawer-head { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 16px; 
-            border-bottom: 1px solid #2d2d2d; 
-        }
-        .drawer-body { 
-            padding: 16px; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 14px; 
-        }
+        /* הגדרות ומגירה צידית */
+        .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 998; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .settings-overlay.active { opacity: 1; pointer-events: auto; }
+        .settings-drawer { position: fixed; top: 0; right: -340px; width: 330px; max-width: 90%; height: 100vh; background: #1a1a1a; z-index: 999; transition: right 0.3s ease; border-left: 1px solid #333; display: flex; flex-direction: column; }
+        .settings-drawer.active { right: 0; }
+        .drawer-head { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #2d2d2d; }
+        .drawer-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
         
-        .setting-box { 
-            background: #242424; 
-            border: 1px solid #333; 
-            border-radius: 8px; 
-            padding: 12px; 
-        }
-        .google-btn { 
-            background: #4285F4; 
-            color: white; 
-            border: none; 
-            padding: 10px; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            width: 100%; 
-            cursor: pointer; 
-            margin-top: 8px; 
-        }
-        .logout-btn { 
-            background: #333; 
-            color: #ff5252; 
-            border: 1px solid #555; 
-            padding: 8px; 
-            border-radius: 6px; 
-            width: 100%; 
-            cursor: pointer; 
-            margin-top: 8px; 
-            font-weight: bold; 
-        }
+        .setting-box { background: #242424; border: 1px solid #333; border-radius: 8px; padding: 12px; }
+        .setting-box-title { font-weight: bold; font-size: 0.9em; margin-bottom: 8px; display: block; color: #4caf50; }
+        .google-btn { background: #4285F4; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 8px; }
+        .logout-btn { background: #333; color: #ff5252; border: 1px solid #555; padding: 8px; border-radius: 6px; width: 100%; cursor: pointer; margin-top: 8px; font-weight: bold; }
+
+        .calc-input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #444; background: #181818; color: #fff; margin-bottom: 6px; font-size: 0.85em; }
 
         /* מצב יום */
-        body.light-mode { 
-            background-color: #f4f6f9; 
-            color: #222; 
-        }
-        body.light-mode .app-header, 
-        body.light-mode .bottom-nav, 
-        body.light-mode .settings-drawer { 
-            background: #fff; 
-            border-color: #ddd; 
-        }
-        body.light-mode .stock-card, 
-        body.light-mode .trade-form, 
-        body.light-mode .trade-item, 
-        body.light-mode .bottom-sheet { 
-            background: #fff; 
-            border-color: #ddd; 
-            color: #222; 
-        }
-        body.light-mode .sheet-handle, 
-        body.light-mode .analysis-text-box, 
-        body.light-mode .setting-box { 
-            background: #f0f3f6; 
-        }
-        body.light-mode .trade-form input, 
-        body.light-mode .search-container input { 
-            background: #f0f0f0; 
-            color: #222; 
-        }
-        body.light-mode .stat-tag { 
-            background: #e8f5e9; 
-            color: #2e7d32; 
-        }
+        body.light-mode { background-color: #f4f6f9; color: #222; }
+        body.light-mode .app-header, body.light-mode .bottom-nav, body.light-mode .settings-drawer { background: #fff; border-color: #ddd; }
+        body.light-mode .stock-card, body.light-mode .trade-form, body.light-mode .trade-item, body.light-mode .bottom-sheet, body.light-mode .stat-card { background: #fff; border-color: #ddd; color: #222; }
+        body.light-mode .sheet-handle, body.light-mode .analysis-text-box, body.light-mode .setting-box, body.light-mode .filter-chip { background: #f0f3f6; color: #333; }
+        body.light-mode .trade-form input, body.light-mode .search-container input, body.light-mode .calc-input { background: #f0f0f0; color: #222; }
+        body.light-mode .stat-tag { background: #e8f5e9; color: #2e7d32; }
     </style>
 </head>
 <body>
@@ -462,18 +377,23 @@
         </div>
         <div class="header-actions">
             <div class="search-container">
-                <input type="text" id="manualSearch" placeholder="חיפוש מניה..." onkeypress="if(event.key === 'Enter') handleSearch()">
+                <input type="text" id="manualSearch" placeholder="חיפוש..." onkeypress="if(event.key === 'Enter') handleSearch()">
                 <button onclick="handleSearch()">🔍</button>
             </div>
             <button class="icon-btn" onclick="toggleSettings(true)">☰</button>
         </div>
     </div>
 
-    <!-- גוף האפליקציה -->
+    <!-- גוף התצוגות -->
     <div class="app-views">
         
         <!-- 1. מסך סורק מניות -->
         <div id="view-screener" class="view">
+            <div class="screener-top-bar">
+                <div class="filter-chip active" onclick="filterScreener('all', this)">הכל</div>
+                <div class="filter-chip" onclick="filterScreener('breakout', this)">פריצות (Breakout)</div>
+                <div class="filter-chip" onclick="filterScreener('pullback', this)">נסיגות (Pullback)</div>
+            </div>
             <div class="screener-list" id="stockListContainer">
                 <p style="text-align:center; color:#888; padding-top:40px;">טוען תוצאות סריקה...</p>
             </div>
@@ -481,6 +401,7 @@
 
         <!-- 2. מסך גרף וניתוח -->
         <div id="view-chart" class="view active">
+            <button class="fullscreen-chart-btn" id="fsBtn" onclick="toggleFullScreenChart()">⛶ מסך מלא</button>
             <div id="tv_chart_container"></div>
             
             <!-- Bottom Sheet ניתוח נשלף -->
@@ -498,9 +419,25 @@
             </div>
         </div>
 
-        <!-- 3. מסך תיק השקעות -->
+        <!-- 3. מסך תיק השקעות ודוח ביצועים -->
         <div id="view-portfolio" class="view">
             <div class="portfolio-view">
+                <!-- סטטיסטיקות תיק -->
+                <div class="stats-summary" id="portfolioStatsBar">
+                    <div class="stat-card">
+                        <div class="stat-card-val" id="statWinRate">0%</div>
+                        <div class="stat-card-lbl">Win Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" id="statTotalPnl">$0</div>
+                        <div class="stat-card-lbl">רווח כולל</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-val" id="statTradesCount">0</div>
+                        <div class="stat-card-lbl">סה"כ עסקאות</div>
+                    </div>
+                </div>
+
                 <div id="authRequiredNotice" class="setting-box" style="text-align:center; display:none;">
                     <p style="margin:0 0 6px 0;">כדי לנהל תיק עסקאות מסונכרן:</p>
                     <button class="google-btn" onclick="loginGoogle()">התחבר עם Google</button>
@@ -517,7 +454,7 @@
                             <input type="number" id="tradePrice" placeholder="שער קנייה ($)" step="0.01">
                             <input type="number" id="tradeComm" placeholder="עמלה ($)" step="0.01">
                         </div>
-                        <button onclick="addTrade()">הוסף לתיק</button>
+                        <button onclick="addTrade()">שמור פוזיציה</button>
                     </div>
 
                     <div id="tradesList"><p style="text-align:center; color:#888;">טוען נתונים...</p></div>
@@ -543,34 +480,70 @@
         </button>
     </div>
 
-    <!-- תפריט הגדרות נשלף (Settings Drawer) -->
+    <!-- תפריט הגדרות מקצועי (Settings Drawer) -->
     <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings(false)"></div>
     <div class="settings-drawer" id="settingsDrawer">
         <div class="drawer-head">
-            <b style="font-size:1.05em;">הגדרות מערכת</b>
+            <b style="font-size:1.05em;">הגדרות וכלים</b>
             <button class="btn-action" onclick="toggleSettings(false)">✕</button>
         </div>
         <div class="drawer-body">
+            
+            <!-- מחשבון סיכון וגודל פוזיציה -->
             <div class="setting-box">
-                <b>חשבון משתמש</b>
-                <div id="userProfileStatus" style="font-size:0.85em; color:#aaa; margin-top:4px;">לא מחובר</div>
+                <span class="setting-box-title">📐 מחשבון גודל פוזיציה וסיכון</span>
+                <input type="number" id="calcPortfolio" class="calc-input" placeholder="הון תיק כולל ($)" value="10000" oninput="calculateRisk()">
+                <div style="display:flex; gap:6px;">
+                    <input type="number" id="calcRiskPct" class="calc-input" placeholder="סיכון (%)" value="1.5" step="0.1" oninput="calculateRisk()">
+                    <input type="number" id="calcEntry" class="calc-input" placeholder="מחיר כניסה ($)" oninput="calculateRisk()">
+                </div>
+                <input type="number" id="calcStop" class="calc-input" placeholder="סטופ-לוס ($)" oninput="calculateRisk()">
+                
+                <div id="calcResult" style="background:#181818; padding:8px; border-radius:6px; font-size:0.85em; line-height:1.5; color:#81c784; margin-top:4px;">
+                    הזן מחיר כניסה וסטופ לחישוב.
+                </div>
+            </div>
+
+            <!-- ייצוא נתונים -->
+            <div class="setting-box">
+                <span class="setting-box-title">📥 ניהול וייצוא נתונים</span>
+                <button class="btn-action" style="width:100%; padding:9px; font-weight:bold;" onclick="exportTradesToCSV()">📊 ייצא עסקאות ל-CSV / Excel</button>
+            </div>
+
+            <!-- הגדרות ברירת מחדל לגרף -->
+            <div class="setting-box">
+                <span class="setting-box-title">⚙️ הגדרות גרף ומסחר</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.85em;">אינטרוול ברירת מחדל:</span>
+                    <select id="defaultInterval" class="calc-input" style="width:auto; margin:0; padding:4px;" onchange="updateChartInterval(this.value)">
+                        <option value="D" selected>יומי (D)</option>
+                        <option value="W">שבועי (W)</option>
+                    </select>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.85em;">עמלת ברירת מחדל ($):</span>
+                    <input type="number" id="defaultComm" class="calc-input" style="width:70px; margin:0; padding:4px;" value="1.00" onchange="localStorage.setItem('defaultComm', this.value)">
+                </div>
+            </div>
+
+            <!-- חשבון משתמש -->
+            <div class="setting-box">
+                <span class="setting-box-title">👤 חשבון משתמש</span>
+                <div id="userProfileStatus" style="font-size:0.85em; color:#aaa;">לא מחובר</div>
                 <div id="authActionArea">
                     <button class="google-btn" onclick="loginGoogle()">התחבר עם Google</button>
                 </div>
             </div>
 
+            <!-- תצוגה -->
             <div class="setting-box">
-                <b>תצוגה</b>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                    <span style="font-size:0.9em;">ערכת נושא:</span>
+                <span class="setting-box-title">🎨 תצוגה</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.85em;">ערכת נושא:</span>
                     <button class="btn-action" id="themeBtn" onclick="toggleTheme()">☀️ מצב יום</button>
                 </div>
             </div>
 
-            <div class="setting-box" style="font-size:0.85em; color:#888;">
-                <b>סטטוס סריקה:</b>
-                <div style="margin-top:4px;">סריקה יומית אוטומטית פעילה.</div>
-            </div>
         </div>
     </div>
 
@@ -593,10 +566,18 @@
         let widget = null;
         let currentTheme = 'dark';
         let activeSymbol = 'SPY';
+        let allScreenerStocks = [];
+        let allUserTrades = [];
+        let currentInterval = 'D';
 
         document.getElementById('tradeDate').valueAsDate = new Date();
+        const savedComm = localStorage.getItem('defaultComm');
+        if (savedComm) {
+            document.getElementById('defaultComm').value = savedComm;
+            document.getElementById('tradeComm').value = savedComm;
+        }
 
-        // 1. אתחול גרף TradingView ללא מגבלות עם אינדיקטורים מובנים
+        // 1. אתחול גרף TradingView ללא מגבלות
         function loadChart(ticker) {
             activeSymbol = ticker;
             document.getElementById('headerSymbol').innerText = ticker;
@@ -605,7 +586,7 @@
             widget = new TradingView.widget({
                 "autosize": true,
                 "symbol": ticker,
-                "interval": "D",
+                "interval": currentInterval,
                 "timezone": "Etc/UTC",
                 "theme": currentTheme,
                 "style": "1",
@@ -624,7 +605,20 @@
             });
         }
 
-        // 2. ניווט טאבים תחתון
+        function updateChartInterval(val) {
+            currentInterval = val;
+            loadChart(activeSymbol);
+        }
+
+        // 2. מסך מלא לגרף
+        function toggleFullScreenChart() {
+            document.body.classList.toggle('is-fullscreen');
+            const isFs = document.body.classList.contains('is-fullscreen');
+            document.getElementById('fsBtn').innerText = isFs ? '✕ יציאה ממסך מלא' : '⛶ מסך מלא';
+            setTimeout(() => { loadChart(activeSymbol); }, 150);
+        }
+
+        // 3. ניווט טאבים
         function switchNav(tab) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -636,7 +630,7 @@
             if (tab === 'portfolio') loadTrades();
         }
 
-        // 3. תפריט הגדרות
+        // 4. הגדרות וערכות נושא
         function toggleSettings(open) {
             document.getElementById('settingsDrawer').classList.toggle('active', open);
             document.getElementById('settingsOverlay').classList.toggle('active', open);
@@ -649,12 +643,36 @@
             loadChart(activeSymbol);
         }
 
-        // 4. כרטיסיית ניתוח תחתונה (Bottom Sheet)
+        // 5. מחשבון סיכון וגודל פוזיציה
+        function calculateRisk() {
+            const capital = parseFloat(document.getElementById('calcPortfolio').value) || 0;
+            const riskPct = parseFloat(document.getElementById('calcRiskPct').value) || 0;
+            const entry = parseFloat(document.getElementById('calcEntry').value) || 0;
+            const stop = parseFloat(document.getElementById('calcStop').value) || 0;
+            const resBox = document.getElementById('calcResult');
+
+            if (!capital || !riskPct || !entry || !stop || entry <= stop) {
+                resBox.innerHTML = 'הזן נתונים תקינים (כניסה מעל סטופ-לוס).';
+                return;
+            }
+
+            const maxRiskDollars = (capital * (riskPct / 100));
+            const riskPerShare = entry - stop;
+            const sharesToBuy = Math.floor(maxRiskDollars / riskPerShare);
+            const totalPositionValue = (sharesToBuy * entry).toFixed(2);
+
+            resBox.innerHTML = `
+                <b>סיכון בעסקה:</b> $${maxRiskDollars.toFixed(2)} (${riskPct}%)<br>
+                <b>כמות לקנייה:</b> ${sharesToBuy} מניות<br>
+                <b>שווי פוזיציה כולל:</b> $${Number(totalPositionValue).toLocaleString()}
+            `;
+        }
+
+        // 6. כרטיסיית ניתוח תחתונה (Bottom Sheet)
         function toggleBottomSheet(forceExpand) {
             const sheet = document.getElementById('analysisSheet');
             const arrow = document.getElementById('sheetArrow');
             const isExp = forceExpand !== undefined ? forceExpand : !sheet.classList.contains('expanded');
-            
             sheet.classList.toggle('expanded', isExp);
             arrow.innerText = isExp ? '▼ סגור ניתוח' : '▲ הצג ניתוח והמלצה';
         }
@@ -662,6 +680,13 @@
         function renderStockAnalysis(stock) {
             document.getElementById('sheetStockTitle').innerText = `${stock.ticker} - $${stock.price || ''}`;
             
+            // עדכון מחשבון הסיכון עם נתוני המניה הנוכחית
+            if (stock.price) {
+                document.getElementById('calcEntry').value = stock.price;
+                if (stock.sma50) document.getElementById('calcStop').value = stock.sma50;
+                calculateRisk();
+            }
+
             let badges = '';
             let texts = '';
 
@@ -705,35 +730,17 @@
             }
         }
 
-        // 5. טעינת נתוני הסורק
+        // 7. טעינת סורק וסינון סטאפים
         async function loadScreener() {
             try {
                 const res = await fetch('screener_results_v2.json?nocache=' + new Date().getTime());
                 const data = await res.json();
-                const container = document.getElementById('stockListContainer');
-                container.innerHTML = '';
+                allScreenerStocks = data.stocks || [];
+                renderScreenerList(allScreenerStocks);
 
-                data.stocks.forEach((stock) => {
-                    const card = document.createElement('div');
-                    card.className = 'stock-card';
-                    const rec = stock.recommendation || stock.setup || 'מגמה חיובית';
-                    card.innerHTML = `
-                        <div>
-                            <div class="stock-ticker">${stock.ticker}</div>
-                            <div class="stock-sub">${rec}</div>
-                        </div>
-                        <div class="stock-price-box">
-                            <div class="stock-price">$${stock.price || ''}</div>
-                            <div style="font-size:0.75em; color:#4caf50; text-align:left;">פתח גרף ➔</div>
-                        </div>
-                    `;
-                    card.onclick = () => selectStockFromList(stock);
-                    container.appendChild(card);
-                });
-
-                if (data.stocks.length > 0) {
-                    activeSymbol = data.stocks[0].ticker;
-                    renderStockAnalysis(data.stocks[0]);
+                if (allScreenerStocks.length > 0) {
+                    activeSymbol = allScreenerStocks[0].ticker;
+                    renderStockAnalysis(allScreenerStocks[0]);
                 }
             } catch (e) {
                 document.getElementById('stockListContainer').innerHTML = '<p style="text-align:center; color:#888; padding-top:40px;">ממתין לסריקה היומית הבאה.</p>';
@@ -741,7 +748,50 @@
             loadChart(activeSymbol);
         }
 
-        // 6. התחברות וניהול תיק ב-Firebase
+        function renderScreenerList(stocks) {
+            const container = document.getElementById('stockListContainer');
+            container.innerHTML = '';
+
+            if (stocks.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#888; padding-top:20px;">לא נמצאו מניות בקטגוריה זו.</p>';
+                return;
+            }
+
+            stocks.forEach((stock) => {
+                const card = document.createElement('div');
+                card.className = 'stock-card';
+                const rec = stock.recommendation || stock.setup || 'מגמה חיובית';
+                card.innerHTML = `
+                    <div>
+                        <div class="stock-ticker">${stock.ticker}</div>
+                        <div class="stock-sub">${rec}</div>
+                    </div>
+                    <div class="stock-price-box">
+                        <div class="stock-price">$${stock.price || ''}</div>
+                        <div style="font-size:0.75em; color:#4caf50; text-align:left;">פתח גרף ➔</div>
+                    </div>
+                `;
+                card.onclick = () => selectStockFromList(stock);
+                container.appendChild(card);
+            });
+        }
+
+        function filterScreener(type, btn) {
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (type === 'all') {
+                renderScreenerList(allScreenerStocks);
+            } else {
+                const filtered = allScreenerStocks.filter(s => {
+                    const text = (s.recommendation || '' + s.setup || '' + s.analysis || '').toLowerCase();
+                    return text.includes(type);
+                });
+                renderScreenerList(filtered);
+            }
+        }
+
+        // 8. ניהול תיק, ייצוא ל-Excel ודוח Win Rate
         auth.onAuthStateChanged((user) => {
             currentUser = user;
             const profileStatus = document.getElementById('userProfileStatus');
@@ -779,24 +829,19 @@
             if (!ticker || !buyPrice) { alert("הזן סימול ומחיר קנייה."); return; }
 
             await db.collection("trades").add({
-                userId: currentUser.uid, 
-                ticker, 
-                buyPrice, 
-                buyComm, 
-                buyDate,
-                status: 'open', 
-                timestamp: new Date().getTime()
+                userId: currentUser.uid, ticker, buyPrice, buyComm, buyDate,
+                status: 'open', timestamp: new Date().getTime()
             });
 
             document.getElementById('tradeTicker').value = '';
             document.getElementById('tradePrice').value = '';
-            document.getElementById('tradeComm').value = '';
         }
 
         async function closeTrade(docId, buyPrice, buyComm) {
             const sellPrice = parseFloat(prompt("שער מכירה ($):"));
             if (!sellPrice) return;
-            const sellComm = parseFloat(prompt("עמלת מכירה ($):", "0")) || 0;
+            const defComm = localStorage.getItem('defaultComm') || "1.00";
+            const sellComm = parseFloat(prompt("עמלת מכירה ($):", defComm)) || 0;
             const today = new Date().toISOString().split('T')[0];
             const sellDate = prompt("תאריך מכירה (YYYY-MM-DD):", today) || today;
 
@@ -806,12 +851,8 @@
             const pnlPercent = (((totalReturn - totalCost) / totalCost) * 100).toFixed(2);
 
             await db.collection("trades").doc(docId).update({
-                sellPrice, 
-                sellComm, 
-                sellDate, 
-                status: 'closed',
-                pnlDollars, 
-                pnlPercent
+                sellPrice, sellComm, sellDate, status: 'closed',
+                pnlDollars, pnlPercent
             });
         }
 
@@ -846,6 +887,47 @@
             }
         }
 
+        function calculatePortfolioStats(trades) {
+            const closedTrades = trades.filter(t => t.status === 'closed');
+            const totalCount = closedTrades.length;
+            
+            if (totalCount === 0) {
+                document.getElementById('statWinRate').innerText = '0%';
+                document.getElementById('statTotalPnl').innerText = '$0';
+                document.getElementById('statTradesCount').innerText = trades.length;
+                return;
+            }
+
+            const winCount = closedTrades.filter(t => parseFloat(t.pnlDollars) > 0).length;
+            const winRate = ((winCount / totalCount) * 100).toFixed(1);
+            const totalPnl = closedTrades.reduce((acc, t) => acc + (parseFloat(t.pnlDollars) || 0), 0).toFixed(2);
+
+            document.getElementById('statWinRate').innerText = `${winRate}%`;
+            document.getElementById('statTotalPnl').innerText = `$${Number(totalPnl).toLocaleString()}`;
+            document.getElementById('statTotalPnl').style.color = totalPnl >= 0 ? '#4caf50' : '#f44336';
+            document.getElementById('statTradesCount').innerText = trades.length;
+        }
+
+        function exportTradesToCSV() {
+            if (allUserTrades.length === 0) {
+                alert("אין עסקאות לייצוא.");
+                return;
+            }
+
+            let csv = "Symbol,Status,Buy Date,Buy Price,Buy Comm,Sell Date,Sell Price,Sell Comm,PnL ($),PnL (%)\n";
+            allUserTrades.forEach(t => {
+                csv += `${t.ticker},${t.status},${t.buyDate || ''},${t.buyPrice || ''},${t.buyComm || 0},${t.sellDate || ''},${t.sellPrice || ''},${t.sellComm || 0},${t.pnlDollars || ''},${t.pnlPercent || ''}%\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `SwingTrades_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function loadTrades() {
             if (!currentUser) return;
             if (unsubscribeTrades) unsubscribeTrades();
@@ -855,17 +937,19 @@
                 .onSnapshot((snapshot) => {
                     const container = document.getElementById('tradesList');
                     container.innerHTML = '';
+                    allUserTrades = [];
 
                     if (snapshot.empty) {
                         container.innerHTML = '<p style="text-align:center; color:#888;">התיק ריק כרגע.</p>';
+                        calculatePortfolioStats([]);
                         return;
                     }
 
-                    const docs = [];
-                    snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
-                    docs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    snapshot.forEach(doc => allUserTrades.push({ id: doc.id, ...doc.data() }));
+                    allUserTrades.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    calculatePortfolioStats(allUserTrades);
 
-                    docs.forEach((trade) => {
+                    allUserTrades.forEach((trade) => {
                         const div = document.createElement('div');
                         div.className = `trade-item ${trade.status}`;
                         const safeDataStr = encodeURIComponent(JSON.stringify(trade));
