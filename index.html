@@ -17,77 +17,83 @@
     
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; overflow-x: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; }
         
         /* הדר עליון */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1e1e1e; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1e1e1e; border-bottom: 1px solid #333; }
         .header h2 { margin: 0; font-size: 1.1em; font-weight: 700; color: #4caf50; }
         .header-controls { display: flex; align-items: center; gap: 8px; }
         
         .search-box { display: flex; align-items: center; background: #2a2a2a; border: 1px solid #444; border-radius: 20px; overflow: hidden; height: 34px; }
-        .search-box input { background: transparent; border: none; color: #fff; padding: 0 10px; outline: none; width: 90px; font-size: 0.9em; }
+        .search-box input { background: transparent; border: none; color: #fff; padding: 0 10px; outline: none; width: 100px; font-size: 0.9em; }
         .search-box button { background: #4caf50; border: none; color: white; padding: 0 12px; height: 100%; cursor: pointer; font-weight: bold; }
         
-        .theme-btn { background: #2a2a2a; color: #fff; border: 1px solid #444; height: 34px; padding: 0 10px; border-radius: 20px; font-size: 0.85em; cursor: pointer; }
+        .theme-btn { background: #2a2a2a; color: #fff; border: 1px solid #444; height: 34px; padding: 0 12px; border-radius: 20px; font-size: 0.85em; cursor: pointer; }
         
-        /* גוף האפליקציה */
-        .container { display: flex; height: calc(100vh - 120px); flex-direction: column; }
-        
-        .view-section { display: none; height: 100%; overflow-y: auto; padding: 12px; }
-        .view-section.active { display: block; }
-        
-        #chart-view { height: 100%; padding: 0; }
-        #tv_chart_container { width: 100%; height: 100%; }
-        
-        /* רשימת מניות */
-        .stock-item { padding: 12px 14px; margin-bottom: 8px; background: #1e1e1e; border-radius: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .stock-item:active { background: #2a2a2a; }
+        /* מבנה ראשי */
+        .app-container { display: flex; flex-direction: column; height: calc(100vh - 60px); }
+
+        /* סורק ותיק */
+        .panel { padding: 12px; overflow-y: auto; flex: 1; }
+        .stock-item { padding: 12px 14px; margin-bottom: 8px; background: #1e1e1e; border-radius: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .stock-item:hover, .stock-item:active { background: #2a2a2a; border-color: #4caf50; }
         .stock-ticker { font-size: 1.1em; font-weight: bold; color: #4caf50; }
         .stock-price { font-weight: 600; color: #ddd; }
         
-        /* טופס וכרטיסי עסקאות */
+        /* טופס פוזיציות */
         .portfolio-form { background: #1e1e1e; padding: 14px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; display: flex; flex-direction: column; gap: 8px; }
         .form-row { display: flex; gap: 8px; }
         .portfolio-form input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 0.95em; }
-        .portfolio-form button { background: #1976d2; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1em; font-weight: bold; }
+        .portfolio-form button { background: #1976d2; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; }
         
         .trade-card { background: #1e1e1e; padding: 14px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #1976d2; border-top: 1px solid #2a2a2a; border-right: 1px solid #2a2a2a; border-bottom: 1px solid #2a2a2a; }
         .trade-card.closed { border-left-color: #757575; opacity: 0.85; }
-        .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; cursor: pointer; }
         .trade-stats { font-size: 0.9em; color: #bbb; line-height: 1.5; }
         .trade-actions { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
         
-        .btn-sm { background: #333; color: white; border: 1px solid #555; padding: 6px 12px; border-radius: 6px; font-size: 0.85em; }
+        .btn-sm { background: #333; color: white; border: 1px solid #555; padding: 6px 12px; border-radius: 6px; font-size: 0.85em; cursor: pointer; }
         .close-btn { background: #d32f2f; border-color: #b71c1c; }
         .profit { color: #4caf50; font-weight: bold; }
         .loss { color: #f44336; font-weight: bold; }
         .date-badge { font-size: 0.75em; background: #2a2a2a; padding: 3px 6px; border-radius: 4px; color: #aaa; margin-left: 4px; }
 
-        /* סרגל ניווט תחתון (כמו באפליקציות נייד) */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #1e1e1e; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        /* הגדרות גרף */
+        #chart-container { width: 100%; height: 100%; flex: 1; min-height: 350px; }
+
+        /* סרגל ניווט תחתון לנייד */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 58px; background: #1e1e1e; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 0.75em; border: none; background: transparent; cursor: pointer; gap: 3px; }
         .nav-item.active { color: #4caf50; font-weight: bold; }
         .nav-icon { font-size: 1.3em; }
 
-        /* תצוגת דסקטופ (מעל 768px) */
-        @media (min-width: 768px) {
-            .container { flex-direction: row; height: 85vh; padding: 20px; gap: 20px; }
+        /* תצוגת דסקטופ / מחשב */
+        @media (min-width: 769px) {
+            .app-container { flex-direction: row; padding: 15px; gap: 15px; height: calc(100vh - 70px); }
             .bottom-nav { display: none; }
-            .sidebar-desktop { width: 420px; background: #1e1e1e; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+            .sidebar-wrap { width: 420px; background: #1e1e1e; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #333; }
             .desktop-tabs { display: flex; border-bottom: 1px solid #333; }
             .desktop-tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 1em; }
             .desktop-tab-btn.active { color: #4caf50; border-bottom: 2px solid #4caf50; font-weight: bold; }
-            .view-section { display: none !important; }
-            .view-section.d-active { display: block !important; }
-            #chart-view { display: block !important; flex: 1; }
+            .main-chart-wrap { flex: 1; background: #1e1e1e; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+            .mobile-only { display: none !important; }
+        }
+
+        /* תצוגת נייד / מובייל */
+        @media (max-width: 768px) {
+            .desktop-tabs { display: none; }
+            .sidebar-wrap { flex: 1; height: calc(100vh - 120px); overflow-y: auto; }
+            .main-chart-wrap { flex: 1; height: calc(100vh - 120px); }
+            .mobile-hidden { display: none !important; }
         }
 
         /* מצב יום */
         body.light-mode { background-color: #f4f6f9; color: #222; }
-        body.light-mode .header, body.light-mode .bottom-nav, body.light-mode .sidebar-desktop { background: #fff; border-color: #ddd; }
-        body.light-mode .stock-item, body.light-mode .portfolio-form, body.light-mode .trade-card { background: #fff; border-color: #ddd; }
-        body.light-mode .portfolio-form input, body.light-mode .search-box input { background: #f9f9f9; color: #222; }
+        body.light-mode .header, body.light-mode .bottom-nav, body.light-mode .sidebar-wrap, body.light-mode .main-chart-wrap { background: #fff; border-color: #ddd; }
+        body.light-mode .stock-item, body.light-mode .portfolio-form, body.light-mode .trade-card { background: #fff; border-color: #ddd; color: #222; }
+        body.light-mode .portfolio-form input, body.light-mode .search-box input { background: #f9f9f9; color: #222; border-color: #ccc; }
         body.light-mode .date-badge { background: #eef1f5; color: #555; }
+        body.light-mode .stock-price { color: #444; }
     </style>
 </head>
 <body>
@@ -102,46 +108,55 @@
         </div>
     </div>
 
-    <div class="container">
-        <!-- מסך סורק מניות -->
-        <div id="screener-section" class="view-section active">
-            <div id="stockList"><p style="text-align:center; color:#888;">טוען סריקה...</p></div>
-        </div>
-        
-        <!-- מסך תיק השקעות -->
-        <div id="portfolio-section" class="view-section">
-            <div class="portfolio-form">
-                <b style="font-size:0.95em;">הוספת פוזיציה חדשה</b>
-                <div class="form-row">
-                    <input type="text" id="tradeTicker" placeholder="סימול (AAPL)">
-                    <input type="date" id="tradeDate">
-                </div>
-                <div class="form-row">
-                    <input type="number" id="tradePrice" placeholder="מחיר קנייה ($)" step="0.01">
-                    <input type="number" id="tradeComm" placeholder="עמלה ($)" step="0.01">
-                </div>
-                <button onclick="addTrade()">הוסף לתיק</button>
+    <div class="app-container">
+        <!-- סרגל צד (סורק ותיק) -->
+        <div class="sidebar-wrap" id="sidebarWrap">
+            <!-- טאבים למחשב -->
+            <div class="desktop-tabs">
+                <button class="desktop-tab-btn active" id="dTabScreener" onclick="switchView('screener')">🔍 סורק מניות</button>
+                <button class="desktop-tab-btn" id="dTabPortfolio" onclick="switchView('portfolio')">💼 תיק השקעות</button>
             </div>
-            <div id="portfolioList"><p style="text-align:center; color:#888;">טוען נתונים...</p></div>
+
+            <!-- תוכן סורק -->
+            <div id="screenerPanel" class="panel">
+                <div id="stockList"><p style="text-align:center; color:#888;">טוען סריקה...</p></div>
+            </div>
+
+            <!-- תוכן תיק השקעות -->
+            <div id="portfolioPanel" class="panel" style="display:none;">
+                <div class="portfolio-form">
+                    <b style="font-size:0.95em;">הוספת פוזיציה חדשה</b>
+                    <div class="form-row">
+                        <input type="text" id="tradeTicker" placeholder="סימול (AAPL)">
+                        <input type="date" id="tradeDate">
+                    </div>
+                    <div class="form-row">
+                        <input type="number" id="tradePrice" placeholder="מחיר קנייה ($)" step="0.01">
+                        <input type="number" id="tradeComm" placeholder="עמלה ($)" step="0.01">
+                    </div>
+                    <button onclick="addTrade()">הוסף לתיק</button>
+                </div>
+                <div id="portfolioList"><p style="text-align:center; color:#888;">טוען נתונים...</p></div>
+            </div>
         </div>
 
-        <!-- מסך גרף -->
-        <div id="chart-view" class="view-section">
-            <div id="tv_chart_container"></div>
+        <!-- אזור גרף -->
+        <div class="main-chart-wrap" id="chartWrap">
+            <div id="chart-container"></div>
         </div>
     </div>
 
-    <!-- סרגל תחתון למובייל -->
+    <!-- סרגל ניווט תחתון למובייל -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="switchMobileTab('screener-section', this)">
+        <button class="nav-item active" id="mNavScreener" onclick="switchMobile('screener')">
             <span class="nav-icon">🔍</span>
             <span>סורק</span>
         </button>
-        <button class="nav-item" onclick="switchMobileTab('chart-view', this)">
+        <button class="nav-item" id="mNavChart" onclick="switchMobile('chart')">
             <span class="nav-icon">📈</span>
             <span>גרף</span>
         </button>
-        <button class="nav-item" onclick="switchMobileTab('portfolio-section', this)">
+        <button class="nav-item" id="mNavPortfolio" onclick="switchMobile('portfolio')">
             <span class="nav-icon">💼</span>
             <span>תיק</span>
         </button>
@@ -168,19 +183,13 @@
 
         function initChart(ticker) {
             currentSymbol = ticker;
-            const bgColor = currentTheme === 'light' ? "#ffffff" : "#121212";
+            const bgColor = currentTheme === 'light' ? "#ffffff" : "#1e1e1e";
             widget = new TradingView.widget({
                 "autosize": true, "symbol": ticker, "interval": "D", "timezone": "Etc/UTC",
                 "theme": currentTheme, "style": "1", "locale": "he_IL", "enable_publishing": false,
                 "backgroundColor": bgColor, "hide_top_toolbar": false, "save_image": false,
-                "container_id": "tv_chart_container"
+                "container_id": "chart-container"
             });
-        }
-
-        function openChartForStock(ticker) {
-            initChart(ticker);
-            const chartBtn = document.querySelectorAll('.nav-item')[1];
-            switchMobileTab('chart-view', chartBtn);
         }
 
         function toggleTheme() {
@@ -190,15 +199,48 @@
             initChart(currentSymbol);
         }
 
-        function switchMobileTab(sectionId, btn) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
+        // מעבר תצוגה בדסקטופ
+        function switchView(tab) {
+            document.getElementById('screenerPanel').style.display = tab === 'screener' ? 'block' : 'none';
+            document.getElementById('portfolioPanel').style.display = tab === 'portfolio' ? 'block' : 'none';
+            document.getElementById('dTabScreener').classList.toggle('active', tab === 'screener');
+            document.getElementById('dTabPortfolio').classList.toggle('active', tab === 'portfolio');
+            if (tab === 'portfolio') loadTrades();
+        }
+
+        // מעבר תצוגה במובייל
+        function switchMobile(tab) {
+            const sidebar = document.getElementById('sidebarWrap');
+            const chart = document.getElementById('chartWrap');
             
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if(btn) btn.classList.add('active');
-            
-            if(sectionId === 'portfolio-section') loadTrades();
-            if(sectionId === 'chart-view' && !widget) initChart(currentSymbol);
+
+            if (tab === 'screener') {
+                sidebar.classList.remove('mobile-hidden');
+                chart.classList.add('mobile-hidden');
+                document.getElementById('screenerPanel').style.display = 'block';
+                document.getElementById('portfolioPanel').style.display = 'none';
+                document.getElementById('mNavScreener').classList.add('active');
+            } else if (tab === 'portfolio') {
+                sidebar.classList.remove('mobile-hidden');
+                chart.classList.add('mobile-hidden');
+                document.getElementById('screenerPanel').style.display = 'none';
+                document.getElementById('portfolioPanel').style.display = 'block';
+                document.getElementById('mNavPortfolio').classList.add('active');
+                loadTrades();
+            } else if (tab === 'chart') {
+                sidebar.classList.add('mobile-hidden');
+                chart.classList.remove('mobile-hidden');
+                document.getElementById('mNavChart').classList.add('active');
+                if (!widget) initChart(currentSymbol);
+            }
+        }
+
+        function openChartForStock(ticker) {
+            initChart(ticker);
+            if (window.innerWidth <= 768) {
+                switchMobile('chart');
+            }
         }
 
         function searchManualStock() {
@@ -230,6 +272,7 @@
             } catch (e) {
                 document.getElementById('stockList').innerHTML = '<p style="text-align:center; color:#888;">חפש מניה או המתן לסריקה.</p>';
             }
+            initChart(currentSymbol);
         }
 
         async function addTrade() {
