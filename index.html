@@ -2,92 +2,98 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>מערכת סריקת מניות - סטאפים והמלצות</title>
+    <title>מערכת סריקת מניות וניהול תיק</title>
+    <!-- טעינת ספריות Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    
     <style>
-        /* --- עיצוב בסיס (מצב לילה - ברירת מחדל) --- */
-        body { font-family: Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 20px; transition: background-color 0.3s, color 0.3s; }
+        /* עיצוב כללי */
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 20px; transition: 0.3s; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .header-controls { display: flex; align-items: center; gap: 15px; }
         
-        /* אזור חיפוש */
         .search-box { display: flex; align-items: center; background: #2d2d2d; border: 1px solid #444; border-radius: 20px; overflow: hidden; }
-        .search-box input { background: transparent; border: none; color: #fff; padding: 8px 15px; outline: none; font-size: 0.95em; width: 180px; }
-        .search-box button { background: #4caf50; border: none; color: white; padding: 8px 15px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .search-box button:hover { background: #45a049; }
-
-        .theme-btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
-        .theme-btn:hover { background: #4caf50; border-color: #4caf50; }
-
+        .search-box input { background: transparent; border: none; color: #fff; padding: 8px 15px; outline: none; width: 150px; }
+        .search-box button { background: #4caf50; border: none; color: white; padding: 8px 15px; cursor: pointer; font-weight: bold; }
+        
+        .theme-btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
+        
         .container { display: flex; gap: 20px; height: 85vh; }
-        .sidebar { width: 380px; background: #1e1e1e; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; transition: background-color 0.3s; }
+        .sidebar { width: 400px; background: #1e1e1e; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; transition: 0.3s; }
+        .main-content { flex-grow: 1; background: #1e1e1e; padding: 15px; border-radius: 8px; }
         
-        .filter-section { background: #2d2d2d; padding: 12px; border-radius: 6px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border: 1px solid #444; transition: 0.3s; }
-        .filter-section input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
-        .filter-section label { cursor: pointer; font-size: 0.95em; user-select: none; }
+        /* טאבים בסרגל הצד */
+        .tabs { display: flex; margin-bottom: 15px; border-bottom: 1px solid #444; }
+        .tab-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 1.1em; border-bottom: 2px solid transparent; transition: 0.3s; }
+        .tab-btn.active { color: #4caf50; border-bottom: 2px solid #4caf50; font-weight: bold; }
         
-        .stock-list-container { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
-        .main-content { flex-grow: 1; background: #1e1e1e; padding: 15px; border-radius: 8px; transition: background-color 0.3s; }
+        .tab-content { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
+        .tab-content.active { display: flex; }
         
-        .stock-item { padding: 15px; margin-bottom: 12px; background: #2d2d2d; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
-        .stock-item:hover { border: 1px solid #4caf50; background: #353535; }
-        .stock-item.active { border: 1px solid #4caf50; background: #303030; }
+        /* סורק */
+        .stock-item { padding: 15px; margin-bottom: 10px; background: #2d2d2d; border-radius: 6px; cursor: pointer; border: 1px solid transparent; }
+        .stock-item:hover, .stock-item.active { border-color: #4caf50; background: #353535; }
+        .stock-ticker { font-size: 1.2em; font-weight: bold; color: #4caf50; }
         
-        .stock-header { display: flex; justify-content: space-between; align-items: center; }
-        .stock-ticker { font-size: 1.3em; font-weight: bold; color: #4caf50; }
-        .expand-icon { font-size: 0.9em; color: #888; transition: transform 0.2s; }
-        .stock-item.active .expand-icon { transform: rotate(180deg); }
+        /* תיק השקעות */
+        .portfolio-form { background: #2d2d2d; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .portfolio-form input { padding: 8px; border-radius: 4px; border: 1px solid #444; background: #1a1a1a; color: #fff; }
+        .portfolio-form button { background: #1976d2; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .portfolio-form button:hover { background: #1565c0; }
         
-        .stock-expanded-content { display: none; margin-top: 15px; border-top: 1px solid #444; padding-top: 15px; }
-        .stock-item.active .stock-expanded-content { display: block; }
-        
-        .recommendation { background: #004d40; color: #b2dfdb; padding: 6px 10px; border-radius: 4px; font-size: 0.95em; font-weight: bold; display: inline-block; margin-bottom: 12px; }
-        .rec-high { background: #b71c1c; color: #ffcdd2; }
-        
-        .explanation-box { background: #1a1a1a; padding: 12px; border-radius: 4px; border-right: 4px solid #4caf50; font-size: 0.9em; color: #dddddd; margin-bottom: 10px; line-height: 1.5; transition: 0.3s; }
-        .explanation-box ul { margin: 5px 0 0 0; padding-right: 20px; }
-        .explanation-box li { margin-bottom: 8px; }
-        
-        .stock-details { font-size: 0.85em; color: #888888; line-height: 1.6; border-top: 1px dashed #444; padding-top: 10px; margin-top: 5px; transition: 0.3s; }
+        .trade-card { background: #2d2d2d; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #1976d2; }
+        .trade-card.closed { border-left-color: #757575; opacity: 0.8; }
+        .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .trade-stats { font-size: 0.9em; color: #bbb; line-height: 1.5; }
+        .trade-actions { margin-top: 10px; }
+        .close-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
+        .profit { color: #4caf50; font-weight: bold; }
+        .loss { color: #f44336; font-weight: bold; }
 
-        /* --- מצב יום (Light Mode) --- */
-        body.light-mode { background-color: #f4f6f9; color: #222222; }
-        body.light-mode .sidebar, body.light-mode .main-content { background: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        body.light-mode .filter-section { background: #f8f9fa; border-color: #dee2e6; }
-        body.light-mode .stock-item { background: #ffffff; border-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        body.light-mode .stock-item:hover { border-color: #4caf50; background: #fdfdfd; }
-        body.light-mode .stock-item.active { border-color: #4caf50; background: #f4fcf5; }
-        body.light-mode .stock-expanded-content { border-top-color: #e9ecef; }
-        body.light-mode .explanation-box { background: #ffffff; color: #333333; border: 1px solid #e9ecef; border-right: 4px solid #4caf50; }
-        body.light-mode .stock-details { color: #555555; border-top-color: #e9ecef; }
-        body.light-mode .theme-btn { background: #ffffff; color: #333; border-color: #ccc; }
-        body.light-mode .theme-btn:hover { background: #f0f0f0; }
-        body.light-mode .search-box { background: #ffffff; border-color: #ccc; }
-        body.light-mode .search-box input { color: #333; }
+        /* מצב יום */
+        body.light-mode { background-color: #f4f6f9; color: #222; }
+        body.light-mode .sidebar, body.light-mode .main-content { background: #fff; border: 1px solid #ddd; }
+        body.light-mode .stock-item, body.light-mode .portfolio-form, body.light-mode .trade-card { background: #fff; border: 1px solid #ddd; }
+        body.light-mode .portfolio-form input { background: #fff; color: #222; border-color: #ccc; }
+        body.light-mode .theme-btn, body.light-mode .search-box { background: #fff; border-color: #ccc; }
+        body.light-mode .search-box input { color: #222; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>סורק מניות יומי - סטאפים למסחר</h2>
+        <h2>מערכת סריקת מניות וניהול תיק</h2>
         <div class="header-controls">
-            <!-- חיפוש ידני -->
             <div class="search-box">
-                <input type="text" id="manualSearch" placeholder="חפש סימול (למשל TSLA)" onkeypress="if(event.key === 'Enter') searchManualStock()">
+                <input type="text" id="manualSearch" placeholder="חפש מניה..." onkeypress="if(event.key === 'Enter') searchManualStock()">
                 <button onclick="searchManualStock()">חפש</button>
             </div>
-            
-            <small id="updateTime">זמן עדכון: בטעינה...</small>
             <button class="theme-btn" id="themeToggleBtn" onclick="toggleTheme()">☀️ מצב יום</button>
         </div>
     </div>
 
     <div class="container">
         <div class="sidebar">
-            <div class="filter-section">
-                <input type="checkbox" id="squeezeFilter" onchange="renderStocks()">
-                <label for="squeezeFilter">הצג רק Bollinger Squeeze</label>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('screener')">🔍 סורק מניות</button>
+                <button class="tab-btn" onclick="switchTab('portfolio')">💼 תיק השקעות</button>
             </div>
-            <div class="stock-list-container" id="stockList">
-                <p>טוען נתונים מהסריקה...</p>
+            
+            <!-- סורק -->
+            <div id="screener" class="tab-content active">
+                <div id="stockList"><p>טוען נתונים...</p></div>
+            </div>
+            
+            <!-- תיק השקעות -->
+            <div id="portfolio" class="tab-content">
+                <div class="portfolio-form">
+                    <b>הוסף פוזיציה חדשה</b>
+                    <input type="text" id="tradeTicker" placeholder="סימול (למשל TSLA)">
+                    <input type="number" id="tradePrice" placeholder="שער קנייה ($)" step="0.01">
+                    <input type="number" id="tradeComm" placeholder="עמלת קנייה ($)" step="0.01">
+                    <button onclick="addTrade()">הוסף לתיק</button>
+                </div>
+                <div id="portfolioList"><p>טוען עסקאות...</p></div>
             </div>
         </div>
 
@@ -96,148 +102,156 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
+        // --- 1. הגדרות Firebase שלך ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0JgU15_MKcwZK0eZIRinqnrOJYppzgp8",
+            authDomain: "swing-portfolio.firebaseapp.com",
+            projectId: "swing-portfolio",
+            storageBucket: "swing-portfolio.firebasestorage.app",
+            messagingSenderId: "1021148994913",
+            appId: "1:1021148994913:web:d31fadc54acace2cafb920"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- 2. משתנים גלובליים ---
         let widget;
-        let allStocksData = [];
         let currentTheme = 'dark';
+        let allStocksData = [];
 
-        // פונקציית החיפוש הידני
-        function searchManualStock() {
-            const ticker = document.getElementById('manualSearch').value.toUpperCase().trim();
-            if(ticker) {
-                // הסרת הסימון מהמניה הפעילה ברשימה
-                document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('active'));
-                // טעינת הגרף של המניה שחופשה
-                initChart(ticker);
-            }
-        }
-
-        function toggleTheme() {
-            const body = document.body;
-            const btn = document.getElementById('themeToggleBtn');
-            
-            body.classList.toggle('light-mode');
-            
-            if (body.classList.contains('light-mode')) {
-                currentTheme = 'light';
-                btn.innerText = '🌙 מצב לילה';
-            } else {
-                currentTheme = 'dark';
-                btn.innerText = '☀️ מצב יום';
-            }
-
-            const activeStockEl = document.querySelector('.stock-item.active .stock-ticker');
-            if (activeStockEl) {
-                initChart(activeStockEl.innerText);
-            } else {
-                const searchVal = document.getElementById('manualSearch').value.toUpperCase().trim();
-                if(searchVal) initChart(searchVal);
-            }
-        }
-
+        // --- 3. גרף TradingView ---
         function initChart(ticker) {
             const bgColor = currentTheme === 'light' ? "#ffffff" : "#1e1e1e";
-            
             widget = new TradingView.widget({
-                "autosize": true,
-                "symbol": ticker,
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": currentTheme,
-                "style": "1",
-                "locale": "he_IL",
-                "enable_publishing": false,
-                "backgroundColor": bgColor,
-                "hide_top_toolbar": false,
-                "save_image": false,
+                "autosize": true, "symbol": ticker, "interval": "D", "timezone": "Etc/UTC",
+                "theme": currentTheme, "style": "1", "locale": "he_IL", "enable_publishing": false,
+                "backgroundColor": bgColor, "hide_top_toolbar": false, "save_image": false,
                 "container_id": "tv_chart_container"
             });
         }
 
-        function renderStocks() {
-            const listContainer = document.getElementById('stockList');
-            const showOnlySqueeze = document.getElementById('squeezeFilter').checked;
-            
-            listContainer.innerHTML = '';
-            
-            let filteredStocks = allStocksData;
-            if (showOnlySqueeze) {
-                filteredStocks = allStocksData.filter(stock => stock.in_squeeze === true);
-            }
-
-            if (filteredStocks.length === 0) {
-                listContainer.innerHTML = '<p>לא נמצאו מניות בתנאים אלו.</p>';
-                return;
-            }
-
-            filteredStocks.forEach((stock, index) => {
-                const div = document.createElement('div');
-                div.className = 'stock-item';
-                if(index === 0) div.classList.add('active');
-                
-                let recText = stock.recommendation || "המניה במגמה עולה לפי הממוצעים ללא טריגר מיוחד כרגע.";
-                let recClass = (stock.score >= 2) ? 'recommendation rec-high' : 'recommendation';
-                
-                let explanationList = "";
-                
-                if(stock.in_squeeze) explanationList += "<li><b>Bollinger Squeeze:</b> רצועות הבולינגר התכווצו משמעותית. מצב זה מצביע על 'שקט מתוח' בשוק, ולרוב מקדים תנועה חדה.</li>";
-                if(stock.macd_bullish) explanationList += "<li><b>חיתוך MACD חיובי:</b> קו המומנטום חצה את קו האיתות כלפי מעלה. איתות טכני לכך שהקונים חוזרים לשלוט.</li>";
-                if(stock.is_pullback) explanationList += "<li><b>פולבאק:</b> המניה נוגעת כעת באזור תמיכה חזק (ממוצע נע). נקודת כניסה אידיאלית.</li>";
-                if(stock.pattern === "פטיש") explanationList += "<li><b>נר פטיש:</b> הופיע נר עם 'זנב' ארוך כלפי מטה. הקונים השתלטו באגרסיביות.</li>";
-                else if (stock.pattern === "בולען שורי") explanationList += "<li><b>נר בולען שורי:</b> נר ירוק גדול ש'בולע' את פעילות היום הקודם.</li>";
-                
-                let finalExplanationHTML = explanationList === "" 
-                    ? "לא זוהה טריגר טכני ספציפי, אך המניה עומדת בתנאי המגמה הבסיסיים." 
-                    : `<ul>${explanationList}</ul>`;
-
-                div.innerHTML = `
-                    <div class="stock-header">
-                        <span class="stock-ticker">${stock.ticker}</span>
-                        <span class="expand-icon">▼</span>
-                    </div>
-                    <div class="stock-expanded-content">
-                        <div class="${recClass}">${recText}</div>
-                        <div class="explanation-box">
-                            <b>ניתוח המערכת:</b>
-                            ${finalExplanationHTML}
-                        </div>
-                        <div class="stock-details">
-                            <b>מחיר:</b> $${stock.price} | <b>RSI:</b> ${stock.rsi}<br>
-                            <b>סקטור:</b> ${stock.sector || "לא ידוע"}
-                        </div>
-                    </div>
-                `;
-                
-                div.onclick = function() {
-                    document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('active'));
-                    this.classList.add('active');
-                    document.getElementById('manualSearch').value = ''; // ניקוי שורת החיפוש
-                    initChart(stock.ticker);
-                };
-                
-                listContainer.appendChild(div);
-            });
-
-            if(filteredStocks.length > 0) {
-                initChart(filteredStocks[0].ticker);
-            }
+        // --- 4. ממשק וטאבים ---
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+            document.getElementById('themeToggleBtn').innerText = currentTheme === 'light' ? '🌙 מצב לילה' : '☀️ מצב יום';
+            initChart(widget ? widget.options.symbol : 'SPY');
         }
 
-        async function loadData() {
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(tabId === 'portfolio') loadTrades();
+        }
+
+        function searchManualStock() {
+            const ticker = document.getElementById('manualSearch').value.toUpperCase().trim();
+            if(ticker) initChart(ticker);
+        }
+
+        // --- 5. טעינת תוצאות הסורק המקומי ---
+        async function loadScreenerData() {
             try {
                 const response = await fetch('screener_results_v2.json?nocache=' + new Date().getTime());
                 const data = await response.json();
+                const list = document.getElementById('stockList');
+                list.innerHTML = '';
                 
-                document.getElementById('updateTime').innerText = 'עודכן: ' + data.last_updated;
-                allStocksData = data.stocks;
-                renderStocks();
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('stockList').innerHTML = '<p>שגיאה בטעינת הנתונים.</p>';
+                data.stocks.forEach((stock, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'stock-item';
+                    div.innerHTML = `<span class="stock-ticker">${stock.ticker}</span> - $${stock.price}<br><small>${stock.recommendation || 'מגמה עולה'}</small>`;
+                    div.onclick = () => initChart(stock.ticker);
+                    list.appendChild(div);
+                });
+                if(data.stocks.length > 0) initChart(data.stocks[0].ticker);
+            } catch (e) {
+                document.getElementById('stockList').innerHTML = '<p>לא נטען קובץ סריקה. חפש מניה ידנית.</p>';
+                initChart('SPY');
             }
         }
 
-        loadData();
+        // --- 6. ניהול תיק השקעות (Firebase) ---
+        async function addTrade() {
+            const ticker = document.getElementById('tradeTicker').value.toUpperCase();
+            const buyPrice = parseFloat(document.getElementById('tradePrice').value);
+            const buyComm = parseFloat(document.getElementById('tradeComm').value) || 0;
+            
+            if(!ticker || !buyPrice) { alert("הכנס סימול ושער קנייה."); return; }
+            
+            await db.collection("trades").add({
+                ticker, buyPrice, buyComm,
+                status: 'open',
+                date: new Date().toISOString()
+            });
+            
+            document.getElementById('tradeTicker').value = '';
+            document.getElementById('tradePrice').value = '';
+            document.getElementById('tradeComm').value = '';
+            loadTrades();
+        }
+
+        async function closeTrade(docId, buyPrice, buyComm) {
+            const sellPrice = parseFloat(prompt("הכנס שער מכירה ($):"));
+            const sellComm = parseFloat(prompt("הכנס עמלת מכירה ($):")) || 0;
+            
+            if(!sellPrice) return;
+            
+            // חישוב רווח/הפסד באחוזים ובדולרים
+            const totalCost = buyPrice + buyComm;
+            const totalReturn = sellPrice - sellComm;
+            const pnlDollars = (totalReturn - totalCost).toFixed(2);
+            const pnlPercent = (((totalReturn - totalCost) / totalCost) * 100).toFixed(2);
+            
+            await db.collection("trades").doc(docId).update({
+                sellPrice, sellComm, status: 'closed',
+                pnlDollars, pnlPercent
+            });
+            loadTrades();
+        }
+
+        function loadTrades() {
+            db.collection("trades").orderBy("date", "desc").onSnapshot((querySnapshot) => {
+                const list = document.getElementById('portfolioList');
+                list.innerHTML = '';
+                
+                if(querySnapshot.empty) {
+                    list.innerHTML = '<p>התיק ריק כרגע.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const trade = doc.data();
+                    const div = document.createElement('div');
+                    div.className = `trade-card ${trade.status}`;
+                    
+                    let statusHtml = '';
+                    if(trade.status === 'open') {
+                        statusHtml = `<button class="close-btn" onclick="closeTrade('${doc.id}', ${trade.buyPrice}, ${trade.buyComm})">סגור פוזיציה</button>`;
+                    } else {
+                        let pnlClass = trade.pnlDollars >= 0 ? 'profit' : 'loss';
+                        statusHtml = `<div class="${pnlClass}">תשואה: ${trade.pnlPercent}% ($${trade.pnlDollars})</div>`;
+                    }
+
+                    div.innerHTML = `
+                        <div class="trade-header" style="cursor:pointer;" onclick="initChart('${trade.ticker}')">
+                            <span class="stock-ticker">${trade.ticker}</span>
+                            <span>${trade.status === 'open' ? '🟢 פתוח' : '⚪ סגור'}</span>
+                        </div>
+                        <div class="trade-stats">
+                            <b>קנייה:</b> $${trade.buyPrice} (עמלה: $${trade.buyComm})<br>
+                            ${trade.status === 'closed' ? `<b>מכירה:</b> $${trade.sellPrice} (עמלה: $${trade.sellComm})` : ''}
+                        </div>
+                        <div class="trade-actions">${statusHtml}</div>
+                    `;
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        // טעינה ראשונית
+        loadScreenerData();
     </script>
 </body>
 </html>
