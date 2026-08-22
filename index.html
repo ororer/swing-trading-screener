@@ -37,14 +37,19 @@
         #chart-wrap { flex: 1; height: 100%; width: 100%; background: #121212; position: relative; }
         #tv_chart_container { width: 100%; height: 100%; }
 
-        /* כרטיסיית ניתוח והמלצה */
-        .analysis-card { position: absolute; top: 12px; right: 12px; z-index: 900; background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(8px); border: 1px solid #444; border-radius: 10px; padding: 12px 14px; max-width: 320px; width: calc(100% - 24px); box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none; transition: 0.2s ease; }
-        .analysis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid #3a3a3a; padding-bottom: 5px; }
-        .analysis-title { font-weight: bold; color: #4caf50; font-size: 1.05em; }
-        .analysis-body { font-size: 0.85em; line-height: 1.5; color: #ddd; max-height: 160px; overflow-y: auto; }
-        .analysis-badge { display: inline-block; background: #2a2a2a; border: 1px solid #444; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-bottom: 6px; color: #81c784; }
+        /* כפתור פתיחת ניתוח */
+        .toggle-analysis-btn { position: absolute; top: 12px; left: 12px; z-index: 850; background: rgba(30, 30, 30, 0.9); border: 1px solid #4caf50; color: #4caf50; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
 
-        /* Drawer תפריט נשלף */
+        /* כרטיסיית ניתוח והמלצה */
+        .analysis-card { position: absolute; top: 12px; right: 12px; z-index: 900; background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); border: 1px solid #4caf50; border-radius: 12px; padding: 14px; max-width: 350px; width: calc(100% - 24px); box-shadow: 0 6px 20px rgba(0,0,0,0.6); display: none; }
+        .analysis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 6px; }
+        .analysis-title { font-weight: bold; color: #4caf50; font-size: 1.1em; }
+        .analysis-body { font-size: 0.9em; line-height: 1.6; color: #e0e0e0; max-height: 250px; overflow-y: auto; }
+        
+        .stat-badge { display: inline-block; background: #252525; border: 1px solid #444; padding: 3px 8px; border-radius: 6px; font-size: 0.8em; margin: 2px 4px 4px 0; color: #81c784; }
+        .analysis-box { background: #202020; border-radius: 6px; padding: 8px 10px; margin-top: 8px; border-right: 3px solid #4caf50; font-size: 0.9em; }
+
+        /* Drawer תפריט */
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 998; opacity: 0; pointer-events: none; transition: 0.3s; }
         .drawer-overlay.active { opacity: 1; pointer-events: auto; }
 
@@ -59,7 +64,7 @@
         .drawer-content { flex: 1; overflow-y: auto; padding: 14px; }
         
         .stock-item { padding: 12px; margin-bottom: 8px; background: #2a2a2a; border-radius: 8px; border: 1px solid #3a3a3a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .stock-item:active { background: #353535; border-color: #4caf50; }
+        .stock-item:hover, .stock-item:active { background: #353535; border-color: #4caf50; }
         .stock-ticker { font-size: 1.1em; font-weight: bold; color: #4caf50; }
         .stock-price { font-weight: bold; color: #fff; }
 
@@ -88,13 +93,15 @@
             .drawer-overlay { display: none; }
             .drawer { position: static; width: 380px; height: 100%; border-right: 1px solid #333; border-left: none; }
             .drawer-header { display: none; }
-            .analysis-card { right: 20px; top: 20px; max-width: 360px; }
+            .analysis-card { right: 20px; top: 20px; max-width: 380px; }
         }
 
         body.light-mode { background-color: #f4f6f9; color: #222; }
         body.light-mode .header, body.light-mode .drawer { background: #fff; border-color: #ddd; }
-        body.light-mode .analysis-card { background: rgba(255, 255, 255, 0.95); border-color: #ddd; color: #222; }
-        body.light-mode .analysis-body { color: #444; }
+        body.light-mode .analysis-card { background: rgba(255, 255, 255, 0.95); border-color: #4caf50; color: #222; }
+        body.light-mode .analysis-body { color: #333; }
+        body.light-mode .analysis-box { background: #f0f4f0; }
+        body.light-mode .stat-badge { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
         body.light-mode .stock-item, body.light-mode .portfolio-form, body.light-mode .trade-card, body.light-mode .auth-banner { background: #fff; border-color: #ddd; color: #222; }
         body.light-mode .portfolio-form input, body.light-mode .search-box input { background: #f9f9f9; color: #222; border-color: #ccc; }
         body.light-mode .stock-price { color: #222; }
@@ -118,13 +125,14 @@
 
     <div class="app-body">
         <div id="chart-wrap">
+            <button class="toggle-analysis-btn" id="openAnalysisBtn" style="display:none;" onclick="toggleAnalysisCard(true)">📊 ניתוח והמלצה</button>
+            
             <!-- כרטיסיית ניתוח והמלצה צפה -->
             <div id="analysisCard" class="analysis-card">
                 <div class="analysis-header">
-                    <span class="analysis-title" id="cardTicker">סימול</span>
-                    <button class="btn-sm" style="padding: 2px 6px;" onclick="closeAnalysisCard()">✕</button>
+                    <span class="analysis-title" id="cardTicker">ניתוח מניה</span>
+                    <button class="btn-sm" style="padding: 2px 6px;" onclick="toggleAnalysisCard(false)">✕</button>
                 </div>
-                <div class="analysis-badge" id="cardRec">המלצה</div>
                 <div class="analysis-body" id="cardDetails"></div>
             </div>
 
@@ -194,6 +202,7 @@
         let widget;
         let currentTheme = 'dark';
         let currentSymbol = 'SPY';
+        let currentStockData = null;
 
         document.getElementById('tradeDate').valueAsDate = new Date();
 
@@ -258,36 +267,64 @@
             });
         }
 
-        function showAnalysis(stock) {
+        function toggleAnalysisCard(show) {
             const card = document.getElementById('analysisCard');
-            document.getElementById('cardTicker').innerText = `${stock.ticker} - $${stock.price || ''}`;
-            document.getElementById('cardRec').innerText = stock.recommendation || 'מגמה חיובית (Setup)';
-            
-            let detailsHtml = '';
-            if (stock.analysis) {
-                detailsHtml += `<div>${stock.analysis}</div>`;
+            const openBtn = document.getElementById('openAnalysisBtn');
+            if (show) {
+                card.style.display = 'block';
+                openBtn.style.display = 'none';
+            } else {
+                card.style.display = 'none';
+                if (currentStockData) openBtn.style.display = 'block';
             }
-            if (stock.rsi) {
-                detailsHtml += `<div><b>RSI:</b> ${stock.rsi}</div>`;
-            }
-            if (stock.volume) {
-                detailsHtml += `<div><b>מחזור:</b> ${stock.volume.toLocaleString()}</div>`;
-            }
-            if (stock.reason) {
-                detailsHtml += `<div style="margin-top:4px; color:#aaa;">${stock.reason}</div>`;
-            }
-
-            document.getElementById('cardDetails').innerHTML = detailsHtml || 'אין פרטי ניתוח נוספים.';
-            card.style.display = 'block';
         }
 
-        function closeAnalysisCard() {
-            document.getElementById('analysisCard').style.display = 'none';
+        function displayDynamicAnalysis(stock) {
+            currentStockData = stock;
+            const card = document.getElementById('analysisCard');
+            const openBtn = document.getElementById('openAnalysisBtn');
+            
+            document.getElementById('cardTicker').innerText = `${stock.ticker} ${stock.price ? '- $' + stock.price : ''}`;
+            
+            let badgesHtml = '';
+            let textHtml = '';
+
+            // חילוץ תגיות ומדדים מספריים
+            if (stock.rsi) badgesHtml += `<span class="stat-badge">RSI: ${stock.rsi}</span>`;
+            if (stock.volume) badgesHtml += `<span class="stat-badge">מחזור: ${Number(stock.volume).toLocaleString()}</span>`;
+            if (stock.sma50 || stock.ma50) badgesHtml += `<span class="stat-badge">MA50: $${stock.sma50 || stock.ma50}</span>`;
+            if (stock.sma150 || stock.ma150) badgesHtml += `<span class="stat-badge">MA150: $${stock.sma150 || stock.ma150}</span>`;
+            if (stock.sma200 || stock.ma200) badgesHtml += `<span class="stat-badge">MA200: $${stock.sma200 || stock.ma200}</span>`;
+            if (stock.change) badgesHtml += `<span class="stat-badge">שינוי: ${stock.change}%</span>`;
+
+            // חילוץ טקסטים של ניתוח והמלצה
+            const rec = stock.recommendation || stock.setup || stock.action || stock.signal;
+            if (rec) {
+                textHtml += `<div class="analysis-box"><b>המלצה / אסטרטגיה:</b><br>${rec}</div>`;
+            }
+
+            const analysis = stock.analysis || stock.reason || stock.summary || stock.notes || stock.description;
+            if (analysis && analysis !== rec) {
+                textHtml += `<div class="analysis-box"><b>ניתוח טכני:</b><br>${analysis}</div>`;
+            }
+
+            // הצגת שאר המפתחות במידה וקיימים
+            for (let key in stock) {
+                if (!['ticker', 'price', 'rsi', 'volume', 'sma50', 'ma50', 'sma150', 'ma150', 'sma200', 'ma200', 'change', 'recommendation', 'setup', 'action', 'signal', 'analysis', 'reason', 'summary', 'notes', 'description'].includes(key)) {
+                    if (typeof stock[key] === 'string' || typeof stock[key] === 'number') {
+                        badgesHtml += `<span class="stat-badge">${key}: ${stock[key]}</span>`;
+                    }
+                }
+            }
+
+            document.getElementById('cardDetails').innerHTML = badgesHtml + textHtml || '<p>אין נתוני ניתוח זמינים.</p>';
+            card.style.display = 'block';
+            openBtn.style.display = 'none';
         }
 
         function selectStock(stock) {
             initChart(stock.ticker);
-            showAnalysis(stock);
+            displayDynamicAnalysis(stock);
             if (window.innerWidth < 900) toggleDrawer(false);
         }
 
@@ -302,7 +339,9 @@
             const ticker = document.getElementById('manualSearch').value.toUpperCase().trim();
             if (ticker) {
                 initChart(ticker);
-                closeAnalysisCard();
+                currentStockData = null;
+                document.getElementById('analysisCard').style.display = 'none';
+                document.getElementById('openAnalysisBtn').style.display = 'none';
                 if (window.innerWidth < 900) toggleDrawer(false);
             }
         }
@@ -317,22 +356,22 @@
                 data.stocks.forEach((stock) => {
                     const div = document.createElement('div');
                     div.className = 'stock-item';
+                    const rec = stock.recommendation || stock.setup || stock.signal || 'התראה טכנית';
                     div.innerHTML = `
                         <div>
                             <span class="stock-ticker">${stock.ticker}</span>
-                            <div style="font-size:0.8em; color:#888;">${stock.recommendation || 'מגמה עולה'}</div>
+                            <div style="font-size:0.8em; color:#888;">${rec}</div>
                         </div>
-                        <div class="stock-price">$${stock.price} ➔</div>
+                        <div class="stock-price">$${stock.price || ''} ➔</div>
                     `;
                     div.onclick = () => selectStock(stock);
                     list.appendChild(div);
                 });
                 if (data.stocks.length > 0) {
-                    currentSymbol = data.stocks[0].ticker;
-                    showAnalysis(data.stocks[0]);
+                    selectStock(data.stocks[0]);
                 }
             } catch (e) {
-                document.getElementById('stockList').innerHTML = '<p style="text-align:center; color:#888;">ממתין לסריקה היומית הבאה.</p>';
+                document.getElementById('stockList').innerHTML = '<p style="text-align:center; color:#888;">ממתין לסריקה הבאה.</p>';
             }
             initChart(currentSymbol);
         }
@@ -443,7 +482,7 @@
                         }
 
                         div.innerHTML = `
-                            <div class="trade-header" onclick="initChart('${trade.ticker}'); closeAnalysisCard(); if(window.innerWidth < 900) toggleDrawer(false);">
+                            <div class="trade-header" onclick="initChart('${trade.ticker}'); if(window.innerWidth < 900) toggleDrawer(false);">
                                 <span class="stock-ticker">${trade.ticker}</span>
                                 <span style="font-size:0.85em;">${trade.status === 'open' ? '🟢 פתוח' : '⚪ סגור'}</span>
                             </div>
