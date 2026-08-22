@@ -1,1 +1,1 @@
-# swing-trading-screener
+# swing-trading-app
