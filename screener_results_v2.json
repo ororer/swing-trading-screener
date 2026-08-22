@@ -1,21 +1,7 @@
 {
-    "last_updated": "2026-08-22 11:18:05",
-    "total_results": 11,
+    "last_updated": "2026-08-22 09:07:04",
+    "total_results": 10,
     "stocks": [
-        {
-            "ticker": "PHM",
-            "price": 129.0,
-            "rsi": 49.57,
-            "sma_50": 128.76,
-            "sma_150": 125.33,
-            "sector": "Consumer Cyclical",
-            "in_squeeze": true,
-            "macd_bullish": false,
-            "pattern": "\u05d0\u05d9\u05df",
-            "is_pullback": true,
-            "recommendation": "\u05d4\u05db\u05e0\u05d4 \u05dc\u05db\u05e0\u05d9\u05e1\u05d4 (\u05e1\u05d8\u05d0\u05e4 \u05de\u05ea\u05d4\u05d5\u05d5\u05d4)",
-            "score": 2
-        },
         {
             "ticker": "AAPL",
             "price": 309.35,
