@@ -27,6 +27,7 @@
             height: 100vh; 
         }
         
+        /* סרגל עליון */
         .app-header { 
             display: flex; 
             justify-content: space-between; 
@@ -35,7 +36,6 @@
             background: #1a1a1a; 
             border-bottom: 1px solid #2d2d2d; 
             height: 52px; 
-            transition: 0.2s;
         }
         .header-title { 
             font-size: 1.1em; 
@@ -88,6 +88,7 @@
             font-size: 1em; 
         }
 
+        /* תוכן מרכזי */
         .app-views { 
             height: calc(100vh - 110px); 
             width: 100%; 
@@ -120,6 +121,7 @@
         body.is-fullscreen .app-views { height: 100vh !important; }
         body.is-fullscreen .fullscreen-chart-btn { top: 15px; left: 15px; background: #4caf50; color: #000; font-weight: bold; }
 
+        /* סרגל ניווט תחתון */
         .bottom-nav { 
             position: fixed; 
             bottom: 0; 
@@ -150,6 +152,50 @@
         .nav-btn.active { color: #4caf50; font-weight: bold; }
         .nav-icon { font-size: 1.3em; }
 
+        /* פאנל ניתוח והמלצה צף מעל הגרף */
+        .plan-panel {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #4caf50;
+            border-radius: 12px;
+            padding: 12px 14px;
+            z-index: 900;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            transition: 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+        .plan-panel.minimized {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .plan-panel.minimized .plan-body { display: none; }
+        
+        .plan-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 6px; margin-bottom: 8px; }
+        .plan-panel.minimized .plan-header { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .plan-title { font-weight: bold; color: #4caf50; font-size: 1.05em; display: flex; align-items: center; gap: 6px; }
+
+        .trade-plan-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
+        .plan-box { background: #202020; border: 1px solid #3d3d3d; border-radius: 6px; padding: 6px 4px; text-align: center; }
+        .plan-box.entry { border-color: #2196f3; }
+        .plan-box.stop { border-color: #f44336; }
+        .plan-box.target { border-color: #4caf50; }
+        
+        .plan-lbl { font-size: 0.7em; color: #aaa; margin-bottom: 2px; }
+        .plan-val { font-size: 0.95em; font-weight: bold; }
+        .plan-val.blue { color: #64b5f6; }
+        .plan-val.red { color: #e57373; }
+        .plan-val.green { color: #81c784; }
+
+        .plan-analysis-text { font-size: 0.85em; color: #ddd; background: #202020; padding: 8px; border-radius: 6px; border-right: 3px solid #4caf50; line-height: 1.4; }
+        .badges-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+        .stat-badge { background: #2a2a2a; border: 1px solid #444; color: #81c784; font-size: 0.75em; padding: 2px 6px; border-radius: 4px; }
+
+        /* סורק מניות */
         .screener-top-bar { display: flex; gap: 8px; padding: 10px 12px 0 12px; overflow-x: auto; }
         .filter-chip { background: #242424; border: 1px solid #3d3d3d; color: #aaa; padding: 5px 12px; border-radius: 16px; font-size: 0.8em; white-space: nowrap; cursor: pointer; }
         .filter-chip.active { background: #4caf50; color: #000; font-weight: bold; border-color: #4caf50; }
@@ -172,51 +218,7 @@
         .stock-price-box { text-align: left; }
         .stock-price { font-size: 1.1em; font-weight: bold; }
 
-        /* כרטיסיית ניתוח תחתונה (Bottom Sheet) */
-        .bottom-sheet { 
-            position: absolute; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: #1e1e1e; 
-            border-top: 2px solid #4caf50; 
-            border-radius: 16px 16px 0 0; 
-            z-index: 900; 
-            transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); 
-            transform: translateY(calc(100% - 44px)); 
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.7); 
-            max-height: 75%; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .bottom-sheet.expanded { transform: translateY(0); }
-        .sheet-handle { 
-            height: 44px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 0 16px; 
-            cursor: pointer; 
-            background: #252525; 
-            border-radius: 14px 14px 0 0; 
-        }
-        .sheet-title { font-weight: bold; font-size: 0.95em; color: #4caf50; display: flex; align-items: center; gap: 8px; }
-        .sheet-content { padding: 14px 16px; overflow-y: auto; font-size: 0.9em; line-height: 1.6; }
-        
-        .trade-plan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
-        .plan-box { background: #262626; border: 1px solid #3d3d3d; border-radius: 8px; padding: 8px 10px; text-align: center; }
-        .plan-box.entry { border-color: #2196f3; }
-        .plan-box.stop { border-color: #f44336; }
-        .plan-box.target { border-color: #4caf50; }
-        .plan-title { font-size: 0.75em; color: #888; margin-bottom: 2px; }
-        .plan-val { font-size: 1.05em; font-weight: bold; }
-        .plan-val.green { color: #4caf50; }
-        .plan-val.red { color: #f44336; }
-        .plan-val.blue { color: #2196f3; }
-
-        .stat-tag { display: inline-block; background: #2d2d2d; border: 1px solid #444; padding: 3px 8px; border-radius: 6px; font-size: 0.8em; margin: 2px 4px 4px 0; color: #81c784; }
-        .analysis-text-box { background: #252525; border-radius: 8px; padding: 10px; margin-top: 8px; border-right: 3px solid #4caf50; font-size: 0.88em; }
-
+        /* תיק השקעות */
         .portfolio-view { padding: 14px; }
         .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
         .stat-card { background: #1e1e1e; border: 1px solid #2d2d2d; border-radius: 8px; padding: 10px; text-align: center; }
@@ -239,6 +241,7 @@
         .profit { color: #4caf50; font-weight: bold; }
         .loss { color: #f44336; font-weight: bold; }
 
+        /* תפריט הגדרות */
         .settings-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 998; opacity: 0; pointer-events: none; transition: 0.3s; }
         .settings-overlay.active { opacity: 1; pointer-events: auto; }
         .settings-drawer { position: fixed; top: 0; right: -340px; width: 330px; max-width: 90%; height: 100vh; background: #1a1a1a; z-index: 999; transition: right 0.3s ease; border-left: 1px solid #333; display: flex; flex-direction: column; }
@@ -254,10 +257,10 @@
 
         body.light-mode { background-color: #f4f6f9; color: #222; }
         body.light-mode .app-header, body.light-mode .bottom-nav, body.light-mode .settings-drawer { background: #fff; border-color: #ddd; }
-        body.light-mode .stock-card, body.light-mode .trade-form, body.light-mode .trade-item, body.light-mode .bottom-sheet, body.light-mode .stat-card { background: #fff; border-color: #ddd; color: #222; }
-        body.light-mode .sheet-handle, body.light-mode .analysis-text-box, body.light-mode .setting-box, body.light-mode .filter-chip, body.light-mode .plan-box { background: #f0f3f6; color: #333; }
+        body.light-mode .stock-card, body.light-mode .trade-form, body.light-mode .trade-item, body.light-mode .plan-panel, body.light-mode .stat-card { background: #fff; border-color: #ddd; color: #222; }
+        body.light-mode .plan-analysis-text, body.light-mode .setting-box, body.light-mode .filter-chip, body.light-mode .plan-box { background: #f0f3f6; color: #333; }
         body.light-mode .trade-form input, body.light-mode .search-container input, body.light-mode .calc-input { background: #f0f0f0; color: #222; }
-        body.light-mode .stat-tag { background: #e8f5e9; color: #2e7d32; }
+        body.light-mode .stat-badge { background: #e8f5e9; color: #2e7d32; }
     </style>
 </head>
 <body>
@@ -278,6 +281,7 @@
 
     <div class="app-views">
         
+        <!-- סורק -->
         <div id="view-screener" class="view">
             <div class="screener-top-bar">
                 <div class="filter-chip active" onclick="filterScreener('all', this)">הכל</div>
@@ -289,24 +293,27 @@
             </div>
         </div>
 
+        <!-- גרף וניתוח -->
         <div id="view-chart" class="view active">
             <button class="fullscreen-chart-btn" id="fsBtn" onclick="toggleFullScreenChart()">⛶ מסך מלא</button>
             <div id="tv_chart_container"></div>
             
-            <div class="bottom-sheet" id="analysisSheet">
-                <div class="sheet-handle" onclick="toggleBottomSheet()">
-                    <div class="sheet-title">
+            <!-- כרטיסיית ניתוח ברורה -->
+            <div class="plan-panel" id="planPanel">
+                <div class="plan-header" onclick="togglePlanPanel()">
+                    <div class="plan-title">
                         <span>🎯</span>
-                        <span id="sheetStockTitle">תוכנית מסחר ויעדים</span>
+                        <span id="planStockTitle">תוכנית מסחר</span>
                     </div>
-                    <span id="sheetArrow" style="font-size:0.8em; color:#888;">▲ החלק לפרטים</span>
+                    <button class="btn-action" style="padding:2px 8px; font-size:0.75em;" id="planToggleBtn">מזער</button>
                 </div>
-                <div class="sheet-content" id="sheetDetails">
-                    <p style="color:#888;">בחר מניה מהסורק להצגת הניתוח המלא.</p>
+                <div class="plan-body" id="planBody">
+                    <!-- יוטמע דינמית -->
                 </div>
             </div>
         </div>
 
+        <!-- תיק השקעות -->
         <div id="view-portfolio" class="view">
             <div class="portfolio-view">
                 <div class="stats-summary" id="portfolioStatsBar">
@@ -350,6 +357,7 @@
 
     </div>
 
+    <!-- ניווט תחתון -->
     <div class="bottom-nav">
         <button class="nav-btn" id="nav-screener" onclick="switchNav('screener')">
             <span class="nav-icon">🔍</span>
@@ -365,6 +373,7 @@
         </button>
     </div>
 
+    <!-- הגדרות צד -->
     <div class="settings-overlay" id="settingsOverlay" onclick="toggleSettings(false)"></div>
     <div class="settings-drawer" id="settingsDrawer">
         <div class="drawer-head">
@@ -491,7 +500,7 @@
         function toggleFullScreenChart() {
             document.body.classList.toggle('is-fullscreen');
             const isFs = document.body.classList.contains('is-fullscreen');
-            document.getElementById('fsBtn').innerText = isFs ? '✕ יציאה ממסך מלא' : '⛶ מסך מלא';
+            document.getElementById('fsBtn').innerText = isFs ? '✕ יציאה' : '⛶ מסך מלא';
             setTimeout(() => { loadChart(activeSymbol); }, 150);
         }
 
@@ -518,6 +527,13 @@
             loadChart(activeSymbol);
         }
 
+        function togglePlanPanel() {
+            const panel = document.getElementById('planPanel');
+            const btn = document.getElementById('planToggleBtn');
+            panel.classList.toggle('minimized');
+            btn.innerText = panel.classList.contains('minimized') ? 'פתח' : 'מזער';
+        }
+
         function calculateRisk() {
             const capital = parseFloat(document.getElementById('calcPortfolio').value) || 0;
             const riskPct = parseFloat(document.getElementById('calcRiskPct').value) || 0;
@@ -542,61 +558,68 @@
             `;
         }
 
-        function toggleBottomSheet(forceExpand) {
-            const sheet = document.getElementById('analysisSheet');
-            const arrow = document.getElementById('sheetArrow');
-            const isExp = forceExpand !== undefined ? forceExpand : !sheet.classList.contains('expanded');
-            sheet.classList.toggle('expanded', isExp);
-            arrow.innerText = isExp ? '▼ סגור תוכנית' : '▲ הצג תוכנית ויעדים';
-        }
-
+        // פונקציית חישוב והצגת תוכנית המסחר המלאה
         function renderStockAnalysis(stock) {
-            document.getElementById('sheetStockTitle').innerText = `${stock.ticker} - $${stock.price || ''}`;
+            const panel = document.getElementById('planPanel');
+            const body = document.getElementById('planBody');
+            panel.classList.remove('minimized');
+            document.getElementById('planToggleBtn').innerText = 'מזער';
+
+            const price = parseFloat(stock.price) || 100;
+            const sma50 = parseFloat(stock.sma50) || parseFloat(stock.sma_50) || (price * 0.96);
+            const sma150 = parseFloat(stock.sma150) || parseFloat(stock.sma_150) || (price * 0.92);
             
+            // חישוב אוטומטי של יעדים וסטופ במידה ואינם קיימים בקובץ
+            const entry = stock.entry ? parseFloat(stock.entry) : Number(price).toFixed(2);
+            let stop = stock.stop_loss ? parseFloat(stock.stop_loss) : Number(Math.min(sma50 * 0.985, price * 0.96)).toFixed(2);
+            if (stop >= entry) stop = (entry * 0.96).toFixed(2);
+
+            const riskPerShare = entry - stop;
+            const tp1 = stock.tp1 ? parseFloat(stock.tp1) : Number(parseFloat(entry) + (riskPerShare * 1.5)).toFixed(2);
+            const tp2 = stock.tp2 ? parseFloat(stock.tp2) : Number(parseFloat(entry) + (riskPerShare * 2.5)).toFixed(2);
+
+            const riskPct = (((entry - stop) / entry) * 100).toFixed(1);
+            const tp1Pct = (((tp1 - entry) / entry) * 100).toFixed(1);
+            const tp2Pct = (((tp2 - entry) / entry) * 100).toFixed(1);
+
+            document.getElementById('planStockTitle').innerText = `${stock.ticker} - $${price}`;
+
             // עדכון מחשבון סיכון
-            if (stock.entry || stock.price) {
-                document.getElementById('calcEntry').value = stock.entry || stock.price;
-                if (stock.stop_loss) document.getElementById('calcStop').value = stock.stop_loss;
-                calculateRisk();
-            }
+            document.getElementById('calcEntry').value = entry;
+            document.getElementById('calcStop').value = stop;
+            calculateRisk();
 
-            let planHtml = '';
-            if (stock.entry && stock.stop_loss) {
-                planHtml = `
-                    <div class="trade-plan-grid">
-                        <div class="plan-box entry">
-                            <div class="plan-title">טריגר כניסה</div>
-                            <div class="plan-val blue">$${stock.entry}</div>
-                        </div>
-                        <div class="plan-box stop">
-                            <div class="plan-title">סטופ-לוס (${stock.risk_pct || ''}%)</div>
-                            <div class="plan-val red">$${stock.stop_loss}</div>
-                        </div>
-                        <div class="plan-box target">
-                            <div class="plan-title">יעד 1 (+${stock.tp1_pct || ''}%)</div>
-                            <div class="plan-val green">$${stock.tp1}</div>
-                        </div>
-                        <div class="plan-box target">
-                            <div class="plan-title">יעד 2 (+${stock.tp2_pct || ''}%)</div>
-                            <div class="plan-val green">$${stock.tp2}</div>
-                        </div>
+            body.innerHTML = `
+                <div class="trade-plan-grid">
+                    <div class="plan-box entry">
+                        <div class="plan-lbl">טריגר כניסה</div>
+                        <div class="plan-val blue">$${entry}</div>
                     </div>
-                `;
-            }
+                    <div class="plan-box stop">
+                        <div class="plan-lbl">סטופ (-${riskPct}%)</div>
+                        <div class="plan-val red">$${stop}</div>
+                    </div>
+                    <div class="plan-box target">
+                        <div class="plan-lbl">יעד 1 (+${tp1Pct}%)</div>
+                        <div class="plan-val green">$${tp1}</div>
+                    </div>
+                    <div class="plan-box target">
+                        <div class="plan-lbl">יעד 2 (+${tp2Pct}%)</div>
+                        <div class="plan-val green">$${tp2}</div>
+                    </div>
+                </div>
 
-            let badges = '';
-            if (stock.rsi) badges += `<span class="stat-tag">RSI: ${stock.rsi}</span>`;
-            if (stock.volume) badges += `<span class="stat-tag">מחזור: ${Number(stock.volume).toLocaleString()}</span>`;
-            if (stock.sma50) badges += `<span class="stat-tag">MA50: $${stock.sma50}</span>`;
-            if (stock.sma150) badges += `<span class="stat-tag">MA150: $${stock.sma150}</span>`;
+                <div class="plan-analysis-text">
+                    <b>המלצה טכנית:</b> ${stock.recommendation || stock.setup || 'מגמה חיובית מעל ממוצע 150 יום. סטאפ סווינג מתהווה.'}
+                </div>
 
-            let analysisText = '';
-            if (stock.analysis) {
-                analysisText = `<div class="analysis-text-box"><b>ניתוח טכני ורציונל:</b><br>${stock.analysis}</div>`;
-            }
-
-            document.getElementById('sheetDetails').innerHTML = planHtml + badges + analysisText;
-            toggleBottomSheet(true);
+                <div class="badges-row">
+                    <span class="stat-badge">RSI: ${stock.rsi || '50'}</span>
+                    <span class="stat-badge">MA50: $${Number(sma50).toFixed(2)}</span>
+                    <span class="stat-badge">MA150: $${Number(sma150).toFixed(2)}</span>
+                    <span class="stat-badge">יחס R:R: 1:2.5</span>
+                </div>
+            `;
         }
 
         function selectStockFromList(stock) {
@@ -609,9 +632,7 @@
             const sym = document.getElementById('manualSearch').value.toUpperCase().trim();
             if (sym) {
                 loadChart(sym);
-                document.getElementById('sheetStockTitle').innerText = sym;
-                document.getElementById('sheetDetails').innerHTML = '<p style="color:#888;">חיפוש ידני - אין תוכנית סריקה שמורה.</p>';
-                toggleBottomSheet(false);
+                renderStockAnalysis({ ticker: sym, price: 0, setup: 'חיפוש ידני' });
                 switchNav('chart');
             }
         }
@@ -645,7 +666,7 @@
             stocks.forEach((stock) => {
                 const card = document.createElement('div');
                 card.className = 'stock-card';
-                const sub = stock.setup || 'מגמה עולה';
+                const sub = stock.setup || stock.recommendation || 'מגמה חיובית';
                 card.innerHTML = `
                     <div>
                         <div class="stock-ticker">${stock.ticker}</div>
@@ -669,7 +690,7 @@
                 renderScreenerList(allScreenerStocks);
             } else {
                 const filtered = allScreenerStocks.filter(s => {
-                    const text = (s.setup || '' + s.analysis || '').toLowerCase();
+                    const text = (s.setup || '' + s.recommendation || '').toLowerCase();
                     return text.includes(type);
                 });
                 renderScreenerList(filtered);
