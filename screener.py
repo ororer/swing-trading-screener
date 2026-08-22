@@ -1,146 +1,101 @@
 import yfinance as yf
 import pandas as pd
-import datetime
 import json
-import time
+import datetime
 
-def calculate_rsi(data, periods=14):
-    delta = data['Close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=periods).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=periods).mean()
-    rs = gain / loss
-    return 100 - (100 / (1 + rs))
+# רשימת מעקב / מניות לסריקה
+TICKERS = ["AAPL", "NVDA", "MSFT", "AMZN", "META", "GOOGL", "TSLA", "AVAV", "CVE", "NET", "ET", "NBIS", "NOC", "PHM", "SMCI", "WDC", "AMD", "PLTR", "UBER", "SHOP"]
 
-def run_screener():
-    print("Starting advanced swing setup screener...")
-    
-    # רשימה מורחבת של מניות מסקטורים שונים
-    tickers = [
-        'AAPL', 'MSFT', 'NVDA', 'META', 'AMZN', 'AVAV', 'CVE', 'NET', 
-        'ET', 'NOC', 'PHM', 'SMCI', 'WDC', 'NBIS', 'JPM', 'V', 'WMT', 'NFLX', 'AMD'
-    ]
-    
-    results = []
-    
-    for ticker in tickers:
-        try:
-            stock = yf.Ticker(ticker)
-            hist = stock.history(period="1y")
-            info = stock.info
-            
-            if hist.empty or len(hist) < 150:
-                continue
-                
-            market_cap = info.get('marketCap', 0)
-            price = hist['Close'].iloc[-1]
-            volume = hist['Volume'].rolling(window=90).mean().iloc[-1]
-            
-            # סינון בסיסי לנזילות ושווי שוק
-            if market_cap < 1e9 or price < 5 or volume < 400000:
-                continue
-                
-            # חישוב ממוצעים ו-RSI
-            hist['SMA_50'] = hist['Close'].rolling(window=50).mean()
-            hist['SMA_150'] = hist['Close'].rolling(window=150).mean()
-            hist['RSI_14'] = calculate_rsi(hist)
-            
-            # MACD חישוב
-            hist['EMA_12'] = hist['Close'].ewm(span=12, adjust=False).mean()
-            hist['EMA_26'] = hist['Close'].ewm(span=26, adjust=False).mean()
-            hist['MACD'] = hist['EMA_12'] - hist['EMA_26']
-            hist['Signal'] = hist['MACD'].ewm(span=9, adjust=False).mean()
-            
-            # Bollinger Bands חישוב
-            hist['SMA_20'] = hist['Close'].rolling(window=20).mean()
-            hist['STD_20'] = hist['Close'].rolling(window=20).std()
-            hist['Upper_BB'] = hist['SMA_20'] + (hist['STD_20'] * 2)
-            hist['Lower_BB'] = hist['SMA_20'] - (hist['STD_20'] * 2)
-            hist['Bandwidth'] = (hist['Upper_BB'] - hist['Lower_BB']) / hist['SMA_20']
-            
-            # שליפת הנתונים הנוכחיים
-            sma_50 = hist['SMA_50'].iloc[-1]
-            sma_150 = hist['SMA_150'].iloc[-1]
-            rsi = hist['RSI_14'].iloc[-1]
-            macd = hist['MACD'].iloc[-1]
-            signal = hist['Signal'].iloc[-1]
-            macd_prev = hist['MACD'].iloc[-2]
-            signal_prev = hist['Signal'].iloc[-2]
-            
-            # זיהוי תנאים מיוחדים (Squeeze, MACD Crossover)
-            current_bandwidth = hist['Bandwidth'].iloc[-1]
-            min_bandwidth_120d = hist['Bandwidth'].rolling(window=120).min().iloc[-1]
-            is_squeeze = bool(current_bandwidth <= (min_bandwidth_120d * 1.2))
-            macd_bullish = bool(macd > signal and macd_prev <= signal_prev)
-            
-            # תבניות נרות יפניים ביומיים האחרונים
-            open_0, close_0, high_0, low_0 = hist['Open'].iloc[-1], hist['Close'].iloc[-1], hist['High'].iloc[-1], hist['Low'].iloc[-1]
-            open_1, close_1 = hist['Open'].iloc[-2], hist['Close'].iloc[-2]
-            
-            # בולען שורי
-            is_engulfing = bool(close_1 < open_1 and close_0 > open_0 and open_0 < close_1 and close_0 > open_1)
-            # פטיש
-            body = abs(close_0 - open_0)
-            lower_shadow = min(open_0, close_0) - low_0
-            upper_shadow = high_0 - max(open_0, close_0)
-            is_hammer = bool(lower_shadow > (2 * body) and upper_shadow < (0.5 * body) and body > 0)
-            
-            has_pattern = is_engulfing or is_hammer
-            pattern_name = "בולען שורי" if is_engulfing else ("פטיש" if is_hammer else "אין")
-            
-            # זיהוי פולבאק (מחיר בקרבה של 2.5% לממוצע 50 או 150)
-            pullback_50 = bool(abs(low_0 - sma_50) / sma_50 < 0.025)
-            pullback_150 = bool(abs(low_0 - sma_150) / sma_150 < 0.025)
-            is_pullback = pullback_50 or pullback_150
-            
-            # סינון סופי: רק מניות במבנה מגמה עולה (מחיר > 150, ממוצע 50 > 150)
-            if price > sma_150 and sma_50 > sma_150 and 40 <= rsi <= 75:
-                
-                # מנוע בניית הסטאפ וההמלצות (Scoring System)
-                score = 0
-                if is_squeeze: score += 1
-                if macd_bullish: score += 1
-                if has_pattern: score += 1
-                if is_pullback: score += 1
-                
-                recommendation = "מעקב (חסר טריגר)"
-                if score >= 2: recommendation = "הכנה לכניסה (סטאפ מתהווה)"
-                if score >= 3: recommendation = "קנייה חזקה - סטאפ בשל"
-                if is_squeeze and has_pattern: recommendation = "פריצה קרובה - כיווץ + נר היפוך"
-                if is_pullback and has_pattern: recommendation = "כניסה בפולבאק - תמיכה + נר היפוך"
+results = []
 
-                results.append({
-                    "ticker": ticker,
-                    "price": round(price, 2),
-                    "rsi": round(rsi, 2),
-                    "sma_50": round(sma_50, 2),
-                    "sma_150": round(sma_150, 2),
-                    "sector": info.get('sector', 'Unknown'),
-                    "in_squeeze": is_squeeze,
-                    "macd_bullish": macd_bullish,
-                    "pattern": pattern_name,
-                    "is_pullback": is_pullback,
-                    "recommendation": recommendation,
-                    "score": score
-                })
-                
-            time.sleep(0.5)
+for ticker in TICKERS:
+    try:
+        data = yf.download(ticker, period="1y", interval="1d", progress=False)
+        if len(data) < 150:
+            continue
             
-        except Exception as e:
-            print(f"Error processing {ticker}: {e}")
-            
-    # סידור התוצאות מהציון הגבוה לנמוך (הסטאפים הטובים ביותר למעלה)
-    results = sorted(results, key=lambda x: x['score'], reverse=True)
-            
-    output_data = {
-        "last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "total_results": len(results),
-        "stocks": results
-    }
-    
-    with open('screener_results_v2.json', 'w') as f:
-        json.dump(output_data, f, indent=4)
-        
-    print(f"Completed. Found {len(results)} active setups.")
+        # שיטוח עמודות במידת הצורך
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = data.columns.get_level_values(0)
 
-if __name__ == '__main__':
-    run_screener()
+        close = data['Close']
+        high = data['High']
+        low = data['Low']
+        volume = data['Volume']
+
+        curr_price = float(close.iloc[-1])
+        sma50 = float(close.rolling(50).mean().iloc[-1])
+        sma150 = float(close.rolling(150).mean().iloc[-1])
+        avg_vol = float(volume.rolling(20).mean().iloc[-1])
+        curr_vol = float(volume.iloc[-1])
+
+        # חישוב RSI
+        delta = close.diff()
+        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+        rs = gain / loss
+        rsi = float((100 - (100 / (1 + rs))).iloc[-1])
+
+        # פילטר מגמה בסיסי: מחיר מעל MA150 ו-MA50
+        if curr_price > sma150 and curr_price > 5 and avg_vol > 300000:
+            recent_high = float(high.iloc[-20:-1].max())
+            recent_low = float(low.iloc[-10:-1].min())
+
+            # זיהוי סטאפ
+            if curr_price >= recent_high * 0.985:
+                setup_type = "Breakout (פריצה)"
+                entry_trigger = round(recent_high * 1.002, 2)
+                stop_loss = round(min(recent_low, sma50 * 0.99), 2)
+            else:
+                setup_type = "Pullback (נסיגה לתמיכה)"
+                entry_trigger = round(curr_price, 2)
+                stop_loss = round(min(sma50 * 0.985, recent_low), 2)
+
+            # חישוב יחידת סיכון (R) ויעדי רווח
+            risk_per_share = entry_trigger - stop_loss
+            if risk_per_share <= 0:
+                risk_per_share = entry_trigger * 0.03
+                stop_loss = round(entry_trigger * 0.97, 2)
+
+            tp1 = round(entry_trigger + (risk_per_share * 1.5), 2)  # יחס 1:1.5
+            tp2 = round(entry_trigger + (risk_per_share * 2.5), 2)  # יחס 1:2.5
+            
+            risk_pct = round(((entry_trigger - stop_loss) / entry_trigger) * 100, 2)
+            tp1_pct = round(((tp1 - entry_trigger) / entry_trigger) * 100, 2)
+            tp2_pct = round(((tp2 - entry_trigger) / entry_trigger) * 100, 2)
+
+            recommendation = f"כניסה: ${entry_trigger} | סטופ: ${stop_loss} (-{risk_pct}%) | יעד 1: ${tp1} (+{tp1_pct}%) | יעד 2: ${tp2} (+{tp2_pct}%)"
+            analysis = f"סטאפ מסוג {setup_type}. המניה נסחרת מעל ממוצע 150 יום (${round(sma150,2)}) וממוצע 50 יום (${round(sma50,2)}). RSI ברמה של {round(rsi,1)}."
+
+            results.append({
+                "ticker": ticker,
+                "price": round(curr_price, 2),
+                "setup": setup_type,
+                "entry": entry_trigger,
+                "stop_loss": stop_loss,
+                "tp1": tp1,
+                "tp2": tp2,
+                "risk_pct": risk_pct,
+                "tp1_pct": tp1_pct,
+                "tp2_pct": tp2_pct,
+                "recommendation": recommendation,
+                "analysis": analysis,
+                "rsi": round(rsi, 1),
+                "volume": int(curr_vol),
+                "sma50": round(sma50, 2),
+                "sma150": round(sma150, 2)
+            })
+
+    except Exception as e:
+        print(f"Error analyzing {ticker}: {e}")
+
+# שמירת קובץ התוצאות
+output = {
+    "last_updated": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+    "stocks": results
+}
+
+with open("screener_results_v2.json", "w", encoding="utf-8") as f:
+    json.dump(output, f, ensure_ascii=False, indent=2)
+
+print(f"Screener finished. Found {len(results)} stocks.")
