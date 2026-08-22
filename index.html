@@ -20,7 +20,7 @@
         .theme-btn { background: #2d2d2d; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
         
         .container { display: flex; gap: 20px; height: 85vh; }
-        .sidebar { width: 400px; background: #1e1e1e; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; transition: 0.3s; }
+        .sidebar { width: 420px; background: #1e1e1e; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; transition: 0.3s; }
         .main-content { flex-grow: 1; background: #1e1e1e; padding: 15px; border-radius: 8px; }
         
         /* טאבים בסרגל הצד */
@@ -28,7 +28,7 @@
         .tab-btn { flex: 1; padding: 10px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 1.1em; border-bottom: 2px solid transparent; transition: 0.3s; }
         .tab-btn.active { color: #4caf50; border-bottom: 2px solid #4caf50; font-weight: bold; }
         
-        .tab-content { display: none; flex-direction: column; height: 100%; overflow-y: auto; }
+        .tab-content { display: none; flex-direction: column; height: 100%; overflow-y: auto; padding-right: 5px;}
         .tab-content.active { display: flex; }
         
         /* סורק */
@@ -37,19 +37,26 @@
         .stock-ticker { font-size: 1.2em; font-weight: bold; color: #4caf50; }
         
         /* תיק השקעות */
-        .portfolio-form { background: #2d2d2d; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .portfolio-form input { padding: 8px; border-radius: 4px; border: 1px solid #444; background: #1a1a1a; color: #fff; }
-        .portfolio-form button { background: #1976d2; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .portfolio-form { background: #2d2d2d; padding: 15px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #444; }
+        .portfolio-form-row { display: flex; gap: 10px; }
+        .portfolio-form input { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #1a1a1a; color: #fff; font-family: inherit;}
+        .portfolio-form button { background: #1976d2; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .portfolio-form button:hover { background: #1565c0; }
         
-        .trade-card { background: #2d2d2d; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #1976d2; }
+        .trade-card { background: #2d2d2d; padding: 12px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #1976d2; position: relative;}
         .trade-card.closed { border-left-color: #757575; opacity: 0.8; }
         .trade-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .trade-stats { font-size: 0.9em; color: #bbb; line-height: 1.5; }
-        .trade-actions { margin-top: 10px; }
-        .close-btn { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8em; }
-        .profit { color: #4caf50; font-weight: bold; }
-        .loss { color: #f44336; font-weight: bold; }
+        .trade-stats { font-size: 0.9em; color: #bbb; line-height: 1.6; }
+        .trade-actions { margin-top: 10px; display: flex; gap: 8px; align-items: center;}
+        
+        .btn-small { background: #333; color: white; border: 1px solid #555; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; transition: 0.2s;}
+        .btn-small:hover { background: #444; }
+        .close-btn { background: #d32f2f; border-color: #b71c1c; }
+        .close-btn:hover { background: #b71c1c; }
+        
+        .profit { color: #4caf50; font-weight: bold; margin-top: 5px; font-size: 1.05em;}
+        .loss { color: #f44336; font-weight: bold; margin-top: 5px; font-size: 1.05em;}
+        .date-badge { font-size: 0.8em; background: #1a1a1a; padding: 2px 6px; border-radius: 4px; color: #888; margin-right: 5px;}
 
         /* מצב יום */
         body.light-mode { background-color: #f4f6f9; color: #222; }
@@ -58,6 +65,8 @@
         body.light-mode .portfolio-form input { background: #fff; color: #222; border-color: #ccc; }
         body.light-mode .theme-btn, body.light-mode .search-box { background: #fff; border-color: #ccc; }
         body.light-mode .search-box input { color: #222; }
+        body.light-mode .date-badge { background: #f0f0f0; color: #555; }
+        body.light-mode .btn-small { background: #f0f0f0; color: #333; border-color: #ccc; }
     </style>
 </head>
 <body>
@@ -79,18 +88,21 @@
                 <button class="tab-btn" onclick="switchTab('portfolio')">💼 תיק השקעות</button>
             </div>
             
-            <!-- סורק -->
             <div id="screener" class="tab-content active">
                 <div id="stockList"><p>טוען נתונים...</p></div>
             </div>
             
-            <!-- תיק השקעות -->
             <div id="portfolio" class="tab-content">
                 <div class="portfolio-form">
                     <b>הוסף פוזיציה חדשה</b>
-                    <input type="text" id="tradeTicker" placeholder="סימול (למשל TSLA)">
-                    <input type="number" id="tradePrice" placeholder="שער קנייה ($)" step="0.01">
-                    <input type="number" id="tradeComm" placeholder="עמלת קנייה ($)" step="0.01">
+                    <div class="portfolio-form-row">
+                        <input type="text" id="tradeTicker" placeholder="סימול (TSLA)" style="flex: 1.5;">
+                        <input type="date" id="tradeDate" style="flex: 1;" title="תאריך קנייה">
+                    </div>
+                    <div class="portfolio-form-row">
+                        <input type="number" id="tradePrice" placeholder="שער קנייה ($)" step="0.01">
+                        <input type="number" id="tradeComm" placeholder="עמלה ($)" step="0.01">
+                    </div>
                     <button onclick="addTrade()">הוסף לתיק</button>
                 </div>
                 <div id="portfolioList"><p>טוען עסקאות...</p></div>
@@ -102,7 +114,7 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        // --- 1. הגדרות Firebase שלך ---
+        // הגדרות Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyD0JgU15_MKcwZK0eZIRinqnrOJYppzgp8",
             authDomain: "swing-portfolio.firebaseapp.com",
@@ -114,12 +126,12 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- 2. משתנים גלובליים ---
         let widget;
         let currentTheme = 'dark';
-        let allStocksData = [];
+        
+        // הגדרת תאריך ברירת מחדל לטופס הקנייה
+        document.getElementById('tradeDate').valueAsDate = new Date();
 
-        // --- 3. גרף TradingView ---
         function initChart(ticker) {
             const bgColor = currentTheme === 'light' ? "#ffffff" : "#1e1e1e";
             widget = new TradingView.widget({
@@ -130,7 +142,6 @@
             });
         }
 
-        // --- 4. ממשק וטאבים ---
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
             currentTheme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
@@ -150,7 +161,6 @@
             if(ticker) initChart(ticker);
         }
 
-        // --- 5. טעינת תוצאות הסורק המקומי ---
         async function loadScreenerData() {
             try {
                 const response = await fetch('screener_results_v2.json?nocache=' + new Date().getTime());
@@ -172,47 +182,79 @@
             }
         }
 
-        // --- 6. ניהול תיק השקעות (Firebase) ---
+        // --- פונקציות התיק ---
         async function addTrade() {
             const ticker = document.getElementById('tradeTicker').value.toUpperCase();
             const buyPrice = parseFloat(document.getElementById('tradePrice').value);
             const buyComm = parseFloat(document.getElementById('tradeComm').value) || 0;
+            const buyDate = document.getElementById('tradeDate').value || new Date().toISOString().split('T')[0];
             
             if(!ticker || !buyPrice) { alert("הכנס סימול ושער קנייה."); return; }
             
             await db.collection("trades").add({
-                ticker, buyPrice, buyComm,
+                ticker, buyPrice, buyComm, buyDate,
                 status: 'open',
-                date: new Date().toISOString()
+                timestamp: new Date().getTime() // למיון נכון
             });
             
             document.getElementById('tradeTicker').value = '';
             document.getElementById('tradePrice').value = '';
             document.getElementById('tradeComm').value = '';
-            loadTrades();
         }
 
         async function closeTrade(docId, buyPrice, buyComm) {
             const sellPrice = parseFloat(prompt("הכנס שער מכירה ($):"));
-            const sellComm = parseFloat(prompt("הכנס עמלת מכירה ($):")) || 0;
-            
             if(!sellPrice) return;
+            const sellComm = parseFloat(prompt("הכנס עמלת מכירה ($):", "0")) || 0;
+            const today = new Date().toISOString().split('T')[0];
+            const sellDate = prompt("תאריך מכירה (YYYY-MM-DD):", today) || today;
             
-            // חישוב רווח/הפסד באחוזים ובדולרים
             const totalCost = buyPrice + buyComm;
             const totalReturn = sellPrice - sellComm;
             const pnlDollars = (totalReturn - totalCost).toFixed(2);
             const pnlPercent = (((totalReturn - totalCost) / totalCost) * 100).toFixed(2);
             
             await db.collection("trades").doc(docId).update({
-                sellPrice, sellComm, status: 'closed',
+                sellPrice, sellComm, sellDate, status: 'closed',
                 pnlDollars, pnlPercent
             });
-            loadTrades();
+        }
+
+        async function editTrade(docId, dataStr) {
+            const trade = JSON.parse(decodeURIComponent(dataStr));
+            
+            const newBuyPrice = parseFloat(prompt("שער קנייה מעודכן:", trade.buyPrice)) || trade.buyPrice;
+            const newBuyComm = parseFloat(prompt("עמלת קנייה מעודכנת:", trade.buyComm)) || 0;
+            const newBuyDate = prompt("תאריך קנייה מעודכן (YYYY-MM-DD):", trade.buyDate) || trade.buyDate;
+            
+            let updateData = { buyPrice: newBuyPrice, buyComm: newBuyComm, buyDate: newBuyDate };
+            
+            if (trade.status === 'closed') {
+                const newSellPrice = parseFloat(prompt("שער מכירה מעודכן:", trade.sellPrice)) || trade.sellPrice;
+                const newSellComm = parseFloat(prompt("עמלת מכירה מעודכנת:", trade.sellComm)) || 0;
+                const newSellDate = prompt("תאריך מכירה מעודכן (YYYY-MM-DD):", trade.sellDate) || trade.sellDate;
+                
+                const totalCost = newBuyPrice + newBuyComm;
+                const totalReturn = newSellPrice - newSellComm;
+                
+                updateData.sellPrice = newSellPrice;
+                updateData.sellComm = newSellComm;
+                updateData.sellDate = newSellDate;
+                updateData.pnlDollars = (totalReturn - totalCost).toFixed(2);
+                updateData.pnlPercent = (((totalReturn - totalCost) / totalCost) * 100).toFixed(2);
+            }
+            
+            await db.collection("trades").doc(docId).update(updateData);
+        }
+
+        async function deleteTrade(docId) {
+            if(confirm("האם אתה בטוח שברצונך למחוק עסקה זו לצמיתות?")) {
+                await db.collection("trades").doc(docId).delete();
+            }
         }
 
         function loadTrades() {
-            db.collection("trades").orderBy("date", "desc").onSnapshot((querySnapshot) => {
+            db.collection("trades").orderBy("timestamp", "desc").onSnapshot((querySnapshot) => {
                 const list = document.getElementById('portfolioList');
                 list.innerHTML = '';
                 
@@ -226,12 +268,19 @@
                     const div = document.createElement('div');
                     div.className = `trade-card ${trade.status}`;
                     
+                    const safeDataStr = encodeURIComponent(JSON.stringify(trade));
+                    
                     let statusHtml = '';
                     if(trade.status === 'open') {
-                        statusHtml = `<button class="close-btn" onclick="closeTrade('${doc.id}', ${trade.buyPrice}, ${trade.buyComm})">סגור פוזיציה</button>`;
+                        statusHtml = `<button class="btn-small close-btn" onclick="closeTrade('${doc.id}', ${trade.buyPrice}, ${trade.buyComm})">סגור פוזיציה</button>`;
                     } else {
                         let pnlClass = trade.pnlDollars >= 0 ? 'profit' : 'loss';
                         statusHtml = `<div class="${pnlClass}">תשואה: ${trade.pnlPercent}% ($${trade.pnlDollars})</div>`;
+                    }
+
+                    let datesHtml = `<span class="date-badge">נקנה: ${trade.buyDate || '-'}</span>`;
+                    if(trade.status === 'closed' && trade.sellDate) {
+                        datesHtml += `<span class="date-badge">נמכר: ${trade.sellDate}</span>`;
                     }
 
                     div.innerHTML = `
@@ -239,18 +288,22 @@
                             <span class="stock-ticker">${trade.ticker}</span>
                             <span>${trade.status === 'open' ? '🟢 פתוח' : '⚪ סגור'}</span>
                         </div>
+                        <div style="margin-bottom: 5px;">${datesHtml}</div>
                         <div class="trade-stats">
                             <b>קנייה:</b> $${trade.buyPrice} (עמלה: $${trade.buyComm})<br>
                             ${trade.status === 'closed' ? `<b>מכירה:</b> $${trade.sellPrice} (עמלה: $${trade.sellComm})` : ''}
                         </div>
-                        <div class="trade-actions">${statusHtml}</div>
+                        <div class="trade-actions">
+                            ${statusHtml}
+                            <button class="btn-small" onclick="editTrade('${doc.id}', '${safeDataStr}')">✏️ ערוך</button>
+                            <button class="btn-small" style="margin-right:auto; background:transparent; border:none;" onclick="deleteTrade('${doc.id}')">🗑️</button>
+                        </div>
                     `;
                     list.appendChild(div);
                 });
             });
         }
 
-        // טעינה ראשונית
         loadScreenerData();
     </script>
 </body>
